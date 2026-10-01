@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="report-data.enc.js"></script>
+<script src="gate.js"></script>
 <style>
 :root{
   color-scheme:light;
@@ -90,130 +92,20 @@ tr.tot td{font-weight:700;border-top:2px solid var(--text-3)}
   <div class="tools">
     <button class="ic" id="themeBtn" title="라이트/다크">테마</button>
     <button class="ic" id="fsBtn" title="전체화면 (F)">전체화면</button>
+    <a class="ic" href="index.html" style="text-decoration:none;display:inline-block">탐색 대시보드</a>
+    <button class="ic" onclick="GS_GATE.logout()">로그아웃</button>
   </div>
 </div></header>
 <main id="main"></main>
 
 <script>
+GS_GATE.open(window.GS_ENC_REPORT, function(){
+const DATA = window.GS_REPORT_DATA;
 /* =====================================================================
    DATA — 26년 9월 발표 PPT(26년_9월_발표_필드.pptx)에 기재된 수치 그대로
    매월 이 블록만 교체하면 화면 전체가 갱신됩니다. 단위: kW
    ===================================================================== */
-const DATA = {
-  period: "2026년 9월",
-  source: "26년_9월_발표_필드.pptx / 2026년_RPS프로젝트_2026-09-18.xlsx",
-  monthly: { // 슬라이드2
-    target: 7000, actual: 4913.74, prevActual: 4028.67, prevTarget: 6000, prevRate: 67.14, rate: 70.20,
-    regions: [
-      { name:"부산", target:4000, actual:557.925, prev:3283.05, rate:13.95, count:5 },
-      { name:"경기", target:3000, actual:4355.815, prev:745.62, rate:145.19, count:5 }
-    ],
-    cumTarget: 64000, cumActual: 54444.5, cumRate: 85.07,
-    review: [
-      "26.8월 목표 6MW → 4.0MW (67.14% 달성)",
-      "26.9월 목표 7MW → 4.9MW (70.20% 달성)",
-      "26년 누적 목표 64MW → 9월 누적 54.4MW (85.07%) [-9.6MW 부족]",
-      "9월 전월(8월) 대비 +885kW (+21.97%)",
-      "부산 목표 4MW → 558kW (13.95%, 5건) · 경기 목표 3MW → 4,356kW (145.19%, 5건)"
-    ]
-  },
-  inflow: { // 슬라이드3
-    cap: { 직접:4488.04, 소개:425.7 }, cnt: { 직접:7, 소개:3 },
-    review: [
-      "전체용량의 직접비중 8월 18.40% / 소개비중 81.60%",
-      "전체용량의 직접비중 9월 91.34% / 소개비중 8.66%",
-      "계약건수의 8월 직접비중 35.71% / 소개비중 64.29%",
-      "계약건수의 9월 직접비중 70.00% / 소개비중 30.00%"
-    ]
-  },
-  types: { // 슬라이드4
-    labels:["발전사업","자가소비","임대","건물지원"], cap:[3579.75,0,0,1333.99], cnt:[9,0,0,1],
-    review:[
-      "8월 전체 계약 중 발전사업 100%",
-      "9월 전체 계약 중 발전사업 72.85% (9건) · 건물지원 27.15% (1건 – 흥국 1,334kW)"
-    ]
-  },
-  people: { // 슬라이드5
-    rows:[
-      { name:"조성현", m:425.7,    mc:3, cum:21807.955, cc:57 },
-      { name:"최창민", m:4068.145, mc:3, cum:13862.795, cc:27 },
-      { name:"진으뜸", m:110.94,   mc:1, cum:14103.485, cc:61 },
-      { name:"임준길", m:308.955,  mc:3, cum:2021.895,  cc:19 }
-    ],
-    total:{ name:"직영 전체", m:4913.74, mc:10, cum:54444.5, cc:175 },
-    review:[
-      "조성현부장 – 9월 0.4MW/3건, 누적 용량 1위 (21.8MW/57건)",
-      "최창민수석 – 9월 4.1MW/3건 (9월 1위), 누적 13.9MW/27건",
-      "진으뜸수석 – 9월 0.1MW/1건, 누적 건수 1위 (14.1MW/61건)",
-      "임준길선임 – 9월 0.3MW/3건, 누적 2.0MW/19건",
-      "직영 전체 26년 누적 – 54.4MW/175건 (4인 외 박도훈·박지훈·정규진 2.6MW/11건 포함)",
-      "전사 전체(직영+외주+입찰) 누적 – 81.1MW/266건"
-    ]
-  },
-  quarter: { // 슬라이드6
-    label:"3분기(7~9월)",
-    rows:[
-      { m:"7월", target:6000, actual:7267.915, cnt:21, rate:121.13 },
-      { m:"8월", target:6000, actual:4028.67,  cnt:14, rate:67.14 },
-      { m:"9월", target:7000, actual:4913.74,  cnt:10, rate:70.20 }
-    ],
-    total:{ target:19000, actual:16210.325, cnt:45, rate:85.32 },
-    review:[
-      "3분기 직영 16.2MW/45건 (목표 19MW 대비 85.32%)",
-      "직영 달성율 7월 121.13% · 8월 67.14% · 9월 70.20%",
-      "3분기 목표 대비 부족분 2,790kW"
-    ]
-  },
-  trend: { // 슬라이드7
-    y2025:[2646.535,3691.765,3204.335,3982.135,5687.04,6367.36,4316.16,4455.415,7264.0,6791.74,7888.56,2939.785],
-    y2026:[6484.83,7382.805,9652.155,6972.45,2556.135,5185.8,7267.915,4028.67,4913.74,null,null,null],
-    fcstA:6049.388888888889, annualTarget:85000,
-    summary:[
-      ["2025년 1~9월 실적","41,615"],["2026년 1~9월 실적","54,444"],["전년 동기 대비","+12,830 (+30.8%)"],
-      ["2025년 연간 실적","59,235"],["2026년 예상 A (10~12월=1~9월 월평균)","72,593"],["2026년 예상 B (10~12월=월 목표용량 달성)","75,444"]
-    ],
-    review:[
-      "2025년 직영 연간 59,235kW (최대 11월 7,889 / 최소 1월 2,647kW)",
-      "2026년 1~9월 54,444kW (전년 동기 대비 +30.8%) · 최대 3월 9,652 / 최소 5월 2,556kW",
-      "예상 A: 10~12월 월 6,049kW → 연간 72,593kW (목표 85MW 대비 85.4%)",
-      "예상 B: 10월 8,000 · 11월 7,000 · 12월 6,000kW → 연간 75,444kW (88.8%)",
-      "※ 26년 직영 연간 목표 85,000kW (정리base 시트)"
-    ]
-  },
-  pipeline: { // 슬라이드8
-    month:"10월", target:8000,
-    possible:[["원종",305,"김해"],["에어로코텍&아스트",7929,"사천"],["성수",600,"화성"],["예소담",500,"청주"],["성우하이텍",1300,"아산"],["삼화당피앤티",129,"남양주"],["석경에이티",308,"안산"],["영우산업",237,"부산"],["코리나",110,"진천"]],
-    possibleSum:11368,
-    confirmed:[["나라판넬",787,"광양"],["툴렉스",72,"시흥"]],
-    confirmedSum:859,
-    review:[
-      "가능건을 10월 내 계약할 수 있도록 집중 (목표 8,000kW)",
-      "가능건 및 확정건 100% 달성 시 10월 목표 153.46% + @ 달성",
-      "가능건 및 확정건 50% 달성 시 10월 목표 76.73% + @ 달성"
-    ]
-  },
-  summary: { // 슬라이드9
-    compare:{ head:["","26년 9월","전월기준(8월)","전년기준(9월)"], rows:[
-      ["목표","7MW","6MW","11.1MW"],
-      ["실적(달성율)","4.9MW (70.20%)","4.0MW (67.14%)","7.3MW (65.44%)"],
-      ["마케팅/소개비율","4,488kW (91.34%, 7건) / 426kW (8.66%, 3건)","741kW (18.40%, 5건) / 3,288kW (81.60%, 9건)","3,553kW (48.92%, 12건) / 3,711kW (51.08%, 14건)"]
-    ]},
-    cum:{ head:["","26년 누적(9월까지)","25년 누적(9월까지)","비고"], rows:[
-      ["직영 목표","64MW","59.6MW",""],
-      ["직영 실적(달성율)","54.4MW (85.07%)","41.6MW (69.82%)",""],
-      ["전체 목표","114.2MW","101MW","직영+외주+입찰"],
-      ["전체 실적(달성율)","81.1MW (71.04%)","68MW (67.32%)","직영+외주+입찰"]
-    ]},
-    actions:[
-      "소개비중이 작년대비·전월대비 급감 → 고객관리 어플 활용",
-      "공장·창고 등 건물문의 유입 감소 및 산단컨설팅 미팅으로 실제 가망 미팅건 감소 → ICT 문의질 상승 요청",
-      "기계약 고객 대상 설문조사 필요 → 개선방안을 직접 확인 가능하고 부족 부분을 채울 최선의 기회 (ICT 요청)",
-      "시공 변화 필요 → 타사와 차별된 방수방식 도입 필요 (현재 누수해결 민원미팅 및 대응이 더 많은 상태)",
-      "10월 방안) 건물지원사업 올해 말 수요조사 활용, 10월 내 계약 유도",
-      "10월 방안) 금융지원 1차 진입 위한 10월 계약 유도"
-    ]
-  }
-};
+
 /* ===================================================================== */
 
 const fmt=(n,d=0)=>n==null?"–":Number(n).toLocaleString("ko-KR",{maximumFractionDigits:d,minimumFractionDigits:d});
@@ -352,6 +244,8 @@ document.getElementById("fsBtn").onclick=fs;
 document.getElementById("themeBtn").onclick=()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark";try{localStorage.setItem("gs-theme",r.dataset.theme)}catch(e){}drawAll()};
 try{const t=localStorage.getItem("gs-theme");if(t){document.documentElement.dataset.theme=t;drawAll()}}catch(e){}
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
+
+});
 </script>
 </body>
 </html>
