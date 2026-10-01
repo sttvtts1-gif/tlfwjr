@@ -24,9 +24,9 @@ def encrypt(pw: str, plain: bytes):
     return {"v": 1, "iter": ITER, "salt": b(salt), "iv": b(iv), "ct": b(ct)}
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        sys.exit(__doc__)
-    pw = sys.argv[1]
+    pw = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("DASH_PASSWORD")
+    if not pw:
+        sys.exit("비밀번호가 없습니다. 인자로 주거나 DASH_PASSWORD 환경변수를 설정하세요.\n" + __doc__)
     root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
     for src, (dst, var) in FILES.items():
         p = os.path.join(root, src)

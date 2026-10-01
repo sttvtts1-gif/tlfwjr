@@ -23,7 +23,28 @@
 - 목표 대비는 선택한 구분(직영/외주/입찰)의 정리base 월별 목표를 합산
 - 용량 구간(100/300/500/1,000kW)은 대시보드에서 임의로 나눈 기준
 - 지사 구분은 엑셀 `지역` 시트의 안성지사/부산지사 분류
-- 데이터 갱신: `python3 tools/extract.py 2025.xlsx 2026.xlsx > data.js` → `python3 tools/encrypt.py <비밀번호>` → `data.enc.js` 업로드
+- 데이터 갱신: 아래 **자동 갱신** 참고 (수동은 `python3 tools/extract.py 2025.xlsx 2026.xlsx > data.js` → `python3 tools/encrypt.py <비밀번호>` → `data.enc.js` 업로드)
+
+## 자동 갱신 (GitHub Actions)
+`source/` 폴더에 RPS 엑셀을 넣고 푸시하면 GitHub가 자동으로 `data.enc.js`를 만들어 반영합니다. 사람이 할 일은 **엑셀 복사 → 커밋 → 푸시** 뿐입니다.
+
+### 최초 1회 설정
+1. 저장소 **Settings → Secrets and variables → Actions → New repository secret**
+   - Name: `DASH_PASSWORD`, Secret: 대시보드 비밀번호 → Add secret
+2. 저장소 **Settings → Actions → General → Workflow permissions**에서 **Read and write permissions** 선택 → Save
+3. (처음 한 번) **Actions** 탭 → "Update dashboard data" → **Run workflow**로 수동 실행해 초록색 체크가 뜨는지 확인
+
+### 매월 갱신 (GitHub Desktop)
+1. GitHub Desktop에서 `File → Clone repository`로 `sttvtts1-gif/tlfwjr`을 PC에 받아둡니다 (최초 1회)
+2. 새 엑셀을 PC의 저장소 폴더 안 `source/`에 복사합니다 (파일명에 연도 포함, 예 `2026년_RPS프로젝트_2026-10-15.xlsx`)
+3. GitHub Desktop 왼쪽에 변경 파일이 뜨면 아래 Summary에 아무 메모(예 "10월 실적") 입력 → **Commit to main** → 상단 **Push origin**
+4. 1~3분 뒤 Actions 탭이 초록색이면 완료. 대시보드 새로고침(Ctrl+F5)
+
+### 주의
+- 이 저장소가 **공개(Public)** 이면 `source/`의 엑셀 원본도 누구나 내려받을 수 있습니다. 대시보드 숫자는 암호화되지만 엑셀은 그대로입니다.
+  - 해결 A: 저장소를 Private으로 전환 (단, GitHub Pages는 유료 플랜(Pro)에서만 Private 저장소 지원)
+  - 해결 B: 엑셀 전용 **비공개 저장소**를 따로 만들어 거기에 `source/`, `tools/`, `.github/`를 두고, Variable `TARGET_REPO=sttvtts1-gif/tlfwjr`와 Secret `TARGET_TOKEN`(fine-grained PAT, tlfwjr에 Contents: Read and write)을 설정하면 공개 저장소에는 `data.enc.js`만 넘어갑니다.
+- 발표자료 페이지(`report-2026-09.html`)의 숫자·리뷰 문구는 PPT 기반이라 자동 갱신 대상이 아닙니다.
 
 ## 발표자료 구성 (report-2026-09.html)
 1. 표지 · 핵심 KPI

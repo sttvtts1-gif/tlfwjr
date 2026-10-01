@@ -1,0 +1,71 @@
+# source/ 폴더에 RPS 엑셀을 올리면(push) 자동으로 data.enc.js를 만들어 반영합니다.
+#
+# 필요한 설정 (저장소 Settings → Secrets and variables → Actions):
+#   - Secret  DASH_PASSWORD : 대시보드 접속 비밀번호 (필수)
+#   - Secret  TARGET_TOKEN  : (선택) 이 저장소가 '데이터 전용 비공개 저장소'일 때,
+#                             공개 Pages 저장소에 쓸 수 있는 토큰(fine-grained PAT, Contents: Read and write)
+#   - Variable TARGET_REPO  : (선택) 위 경우 대상 저장소 이름, 예: sttvtts1-gif/tlfwjr
+#   TARGET_REPO가 없으면 이 저장소 자체에 data.enc.js를 커밋합니다.
+name: Update dashboard data
+
+on:
+  push:
+    paths:
+      - "source/**.xlsx"
+      - "tools/**"
+      - ".github/workflows/update-data.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install openpyxl cryptography
+
+      - name: Extract + encrypt
+        env:
+          DASH_PASSWORD: ${{ secrets.DASH_PASSWORD }}
+        run: |
+          set -e
+          test -n "$DASH_PASSWORD" || { echo "::error::DASH_PASSWORD secret이 설정되지 않았습니다"; exit 1; }
+          ls source/*.xlsx >/dev/null 2>&1 || { echo "::error::source/ 폴더에 xlsx 파일이 없습니다"; exit 1; }
+          python3 tools/extract.py $(ls source/*.xlsx | sort) > data.js
+          python3 tools/encrypt.py
+          rm -f data.js
+          ls -la data.enc.js
+
+      - name: Commit to this repo
+        if: ${{ vars.TARGET_REPO == '' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.enc.js
+          git diff --cached --quiet && echo "변경 없음" || git commit -m "data: 엑셀 갱신 반영 ($(date -u +%Y-%m-%d))"
+          git push
+
+      - name: Push to Pages repo
+        if: ${{ vars.TARGET_REPO != '' }}
+        env:
+          TARGET_TOKEN: ${{ secrets.TARGET_TOKEN }}
+          TARGET_REPO: ${{ vars.TARGET_REPO }}
+        run: |
+          set -e
+          test -n "$TARGET_TOKEN" || { echo "::error::TARGET_TOKEN secret이 없습니다"; exit 1; }
+          git clone --depth 1 "https://x-access-token:${TARGET_TOKEN}@github.com/${TARGET_REPO}.git" target
+          cp data.enc.js target/data.enc.js
+          cd target
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.enc.js
+          git diff --cached --quiet && echo "변경 없음" || git commit -m "data: 엑셀 갱신 반영 ($(date -u +%Y-%m-%d))"
+          git push

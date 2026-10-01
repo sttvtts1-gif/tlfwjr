@@ -1,5 +1,5 @@
 """RPS프로젝트 엑셀(연도별) -> data.js 생성. 사용: python3 extract.py 2025.xlsx 2026.xlsx > ../data.js"""
-import openpyxl,json,datetime,re,sys
+import openpyxl,json,datetime,re,sys,os
 types={'발전사업(A)':'발전사업','자가소비(B)':'자가소비','PPA 사업(C)':'PPA','리스사업(D)':'리스','임대사업(E)':'임대','환경부사업(F)':'환경부','프로젝트(G)':'프로젝트','협력사 EPC(H)':'협력사EPC','협력사 하도(I)':'협력사하도','기타(Z)':'기타(Z)'}
 branch={'안성지사':['경기','강원','충남','충북','서울','인천','대전','세종'],'부산지사':['경남','경북','전남','전북','부산','대구','울산','제주','광주']}
 b_of={r:b for b,rs in branch.items() for r in rs}
@@ -10,8 +10,13 @@ def dt(v):
     if m: y,mo,d=m.groups(); y=int(y); y=y+2000 if y<100 else y; return f'{y:04d}-{int(mo):02d}-{int(d):02d}'
     return s(v)
 rows=[];targets={}
+byyear={}
 for f in sys.argv[1:]:
-    yr=int(re.search(r'(20\d\d)',f).group(1))
+    m=re.search(r'(20\d\d)',os.path.basename(f))
+    if not m: print('연도를 파일명에서 찾지 못함, 건너뜀:',f,file=sys.stderr); continue
+    byyear[int(m.group(1))]=f  # 같은 연도 파일이 여러 개면 마지막(정렬상 뒤) 파일 사용
+for yr,f in sorted(byyear.items()):
+    print('읽는 중:',yr,f,file=sys.stderr)
     wb=openpyxl.load_workbook(f,read_only=True,data_only=True)
     t={}
     for r in wb['정리base'].iter_rows(min_row=3,max_row=10,values_only=True):
