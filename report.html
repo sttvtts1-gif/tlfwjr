@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>그랜드썬 월간 실적 발표</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>document.write('<script src="data.enc.js?t='+Date.now()+'"><\/script><script src="notes.enc.js?t='+Date.now()+'"><\/script>');</script>
+<script src="gate.js"></script>
+<style>
+:root{color-scheme:light;--bg:#f4f4f2;--surface:#fcfcfb;--border:#e3e2de;--text-1:#0b0b0b;--text-2:#52514e;--text-3:#8a8984;
+  --s-actual:#2a78d6;--s-prev:#eb6834;--s-target:#c9c8c3;--s-fcst:#86b6ef;--good:#008300;--warn:#b26b00;--bad:#c43c3b;--accent:#2a78d6;--grid:#ecebe7}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#111110;--surface:#1a1a19;--border:#2e2e2b;--text-1:#fff;--text-2:#c3c2b7;--text-3:#8d8c84;
+  --s-actual:#3987e5;--s-prev:#d95926;--s-target:#55544f;--s-fcst:#184f95;--good:#3fb950;--warn:#e3a33b;--bad:#e66767;--accent:#3987e5;--grid:#2a2a27}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#111110;--surface:#1a1a19;--border:#2e2e2b;--text-1:#fff;--text-2:#c3c2b7;--text-3:#8d8c84;
+  --s-actual:#3987e5;--s-prev:#d95926;--s-target:#55544f;--s-fcst:#184f95;--good:#3fb950;--warn:#e3a33b;--bad:#e66767;--accent:#3987e5;--grid:#2a2a27}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text-1);font-family:"Noto Sans KR",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--border)}
+.bar{max-width:1280px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-weight:700;font-size:17px;letter-spacing:-.01em}
+.brand small{display:block;font-weight:400;font-size:12px;color:var(--text-3)}
+nav{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+nav a{font-size:13px;color:var(--text-2);text-decoration:none;padding:6px 10px;border-radius:6px}
+nav a:hover{background:var(--bg)} nav a.on{background:var(--text-1);color:var(--surface)}
+.tools{display:flex;gap:6px;align-items:center}
+button.ic,a.ic,select.ic{border:1px solid var(--border);background:var(--surface);color:var(--text-2);border-radius:6px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer;text-decoration:none;display:inline-block}
+button.ic:hover,a.ic:hover{color:var(--text-1)}
+main{max-width:1280px;margin:0 auto;padding:16px}
+section.slide{min-height:calc(100vh - 70px);padding:24px 0 40px;scroll-margin-top:64px}
+.eyebrow{font-size:12px;color:var(--text-3);letter-spacing:.04em}
+h2{font-size:26px;margin:4px 0 18px;letter-spacing:-.02em}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+@media (max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+.card h3{margin:0 0 12px;font-size:14px;font-weight:500;color:var(--text-2)}
+.kpi .v{font-size:34px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:15px;font-weight:500;color:var(--text-2);margin-left:3px}
+.kpi .s{font-size:13px;color:var(--text-2);margin-top:4px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
+.good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)} .mut{color:var(--text-3)}
+.meter{height:6px;background:var(--grid);border-radius:99px;margin-top:10px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--s-actual);border-radius:99px}
+.chart{position:relative;height:300px} .chart.tall{height:380px}
+.review{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:14px 18px;margin-top:14px}
+.review b{font-size:13px;color:var(--text-3);display:block;margin-bottom:6px;font-weight:500}
+.review ul{margin:0;padding-left:18px} .review li{margin:4px 0;font-size:14px;line-height:1.55;color:var(--text-1)}
+.review .empty{color:var(--text-3);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:9px 10px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+th{font-weight:500;color:var(--text-2);font-size:12px;background:var(--bg)}
+th:first-child,td:first-child,th.l{text-align:left}
+td.l{text-align:left;white-space:normal}
+tr.tot td{font-weight:700;border-top:2px solid var(--text-3)}
+.tblwrap{overflow-x:auto}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--text-2);margin-bottom:8px;flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.note{font-size:12px;color:var(--text-3);margin-top:8px}
+.split{display:flex;height:34px;border-radius:6px;overflow:hidden;gap:2px;margin:8px 0 4px}
+.split div{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#fff;min-width:0;overflow:hidden;white-space:nowrap}
+.cover{display:flex;flex-direction:column;justify-content:center}
+.cover h1{font-size:44px;margin:6px 0 10px;letter-spacing:-.03em}
+.cover p{color:var(--text-2);margin:0 0 28px}
+.rv .card{padding:20px 22px}
+.rvh{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.rvh>div{display:flex;align-items:center;gap:10px}
+.rvh .num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:none}
+.rvh b{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.rvh small{display:block;font-size:12px;color:var(--text-3);margin-top:1px}
+.rvh small.warn{color:var(--warn)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.st{background:var(--bg);border-radius:10px;padding:10px 12px}
+.st small{display:block;font-size:11px;color:var(--text-3);margin-bottom:2px}
+.st b{font-size:20px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.15}
+.st b i{font-style:normal;font-size:12px;font-weight:500;color:var(--text-2);margin-left:2px}
+.st em{display:block;font-style:normal;font-size:11px;color:var(--text-2);margin-top:3px}
+table.kv{font-size:14.5px} table.kv tr{border-bottom:1px solid var(--border)} table.kv tr:last-child{border-bottom:0}
+table.kv th{width:88px;text-align:left;background:transparent;color:var(--text-3);font-size:12px;font-weight:500;padding:10px 0;vertical-align:top;border:0}
+table.kv td{text-align:left;white-space:normal;padding:10px 0 10px 8px;border:0;line-height:1.5;font-weight:500}
+table.kv td.sub{color:var(--text-2);font-weight:400;font-size:13px;width:40%}
+table.kv td small{font-weight:400}
+table.cmp{font-size:14.5px}
+table.cmp th{background:transparent;font-size:12px;color:var(--text-3);padding:6px 8px;border-bottom:1px solid var(--border)}
+table.cmp thead th:first-child{text-align:left}
+table.cmp tbody th{text-align:left;font-weight:500;color:var(--text-2);padding:9px 8px 9px 0;border-bottom:1px solid var(--border)}
+table.cmp td{padding:9px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+table.cmp td.now{font-weight:700;color:var(--text-1)}
+table.cmp td small{font-size:11px;font-weight:400}
+table.cmp tr:last-child td,table.cmp tr:last-child th{border-bottom:0}
+.chip{display:inline-block;padding:2px 9px;border-radius:99px;border:1px solid currentColor;font-size:12px;font-weight:500;margin-right:2px}
+.ed .card.edc{padding:18px 20px;border-top:3px solid var(--accent)}
+.ed .edc .rvh{margin-bottom:10px}
+.ed .edc .rvh b{font-size:16px}
+.ed .edc button.ic{padding:4px 10px;font-size:12px}
+.ed ol.items{margin:0;padding-left:0;list-style:none;counter-reset:n}
+.ed ol.items li{counter-increment:n;position:relative;padding:9px 0 9px 30px;font-size:14.5px;line-height:1.6;border-bottom:1px dashed var(--border)}
+.ed ol.items li:last-child{border-bottom:0}
+.ed ol.items li::before{content:counter(n);position:absolute;left:0;top:10px;width:21px;height:21px;border-radius:6px;background:var(--bg);color:var(--text-2);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.ed .empty{color:var(--text-3);font-size:13px;padding:10px 0}
+.ed textarea{width:100%;font:inherit;font-size:14px;line-height:1.6;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--surface);color:var(--text-1)}
+@media (max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+.pdfbox{position:fixed;left:-20000px;top:0;width:1120px;background:#fff;color:#0b0b0b}
+.pdfpage{width:1120px;padding:18px 18px 24px;background:#fff}
+.pdfpage .grid.rv{grid-template-columns:1fr 1fr}.pdfpage .grid.ed{grid-template-columns:1fr 1fr 1fr;margin-top:0!important}
+.pdfhead{display:flex;align-items:baseline;gap:10px;border-bottom:2px solid #2a78d6;padding:2px 0 10px;margin-bottom:14px}
+.pdfhead b{color:#2a78d6;font-size:15px;letter-spacing:.02em}.pdfhead .t{font-size:20px;font-weight:700;color:#0b0b0b}
+.pdfhead .m{margin-left:auto;font-size:11px;color:#8a8984}
+@media print{header{display:none}section.slide{page-break-after:always;min-height:auto}
+  body.printwrap section.slide:not(#wrap){display:none!important}
+  body.printwrap #wrap .ic,body.printwrap #wrap textarea,body.printwrap #wrap .note{display:none!important}
+  body.printwrap #wrap .card,body.printwrap #wrap .edc{break-inside:avoid}
+  @page{size:A4 landscape;margin:8mm}}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <div class="brand">GRAND SUN 월간 실적 발표<small id="periodLabel"></small></div>
+  <nav id="nav"></nav>
+  <div class="tools">
+    <select class="ic" id="monthSel" title="발표 월"></select>
+    <button class="ic" id="themeBtn">테마</button>
+    <button class="ic" id="fsBtn" title="전체화면 (F)">전체화면</button>
+    <a class="ic" href="index.html">탐색 대시보드</a>
+    <button class="ic" onclick="GS_GATE.logout()">로그아웃</button>
+  </div>
+</div></header>
+<main id="main"></main>
+
+<script>
+GS_GATE.open([window.GS_ENC_DATA, window.GS_ENC_NOTES], function(){
+const ROWS=window.GS_DATA.rows, TG=window.GS_DATA.targets, NOTES=window.GS_NOTES||{};
+/* 수기 메모: notes.js 기본값 + 이 브라우저에서 편집한 값(localStorage) 병합 */
+const LS=k=>{try{return JSON.parse(localStorage.getItem("gs-notes-"+k)||"null")}catch(e){return null}};
+/* 이 브라우저 저장본(localStorage)은 GitHub 반영 전까지의 임시 버퍼로만 사용:
+   - 아직 GitHub에 못 올린(_pending) 편집 → 이 브라우저 것 우선
+   - 올라간 지 3분 지났거나 notes.js가 더 새것 → notes.js(다른 PC 편집 포함) 사용, 임시본 삭제 */
+const getNote=k=>{const base=NOTES[k]||{},loc=LS(k);if(!loc)return Object.assign({},base);
+  const stale=!loc._pending&&((base._updated||0)>=(loc._updated||0)||Date.now()-(loc._pushedAt||loc._updated||0)>180000);
+  if(stale){try{localStorage.removeItem("gs-notes-"+k)}catch(e){};return Object.assign({},base)}
+  return Object.assign({},base,loc)};
+window.gsResetLocal=function(){try{Object.keys(localStorage).filter(x=>x.startsWith("gs-notes-")).forEach(x=>localStorage.removeItem(x))}catch(e){};location.reload()};
+function saveNote(k,field,lines){const o=Object.assign({},getNote(k));o[field]=lines;o._updated=Date.now();o._pending=true;delete o._pushedAt;try{localStorage.setItem("gs-notes-"+k,JSON.stringify(o))}catch(e){}}
+function markPushed(){try{Object.keys(localStorage).filter(x=>x.startsWith("gs-notes-")).forEach(x=>{const o=JSON.parse(localStorage.getItem(x)||"{}");if(o._pending){o._pending=false;o._pushedAt=Date.now();localStorage.setItem(x,JSON.stringify(o))}})}catch(e){}}
+window.gsEdit=function(btn,k,field){const box=btn.closest(".review, .edc"),ta=box.querySelector("textarea"),ul=box.querySelector(".items");
+  if(ta.hidden){ta.hidden=false;ul.hidden=true;btn.textContent="저장";ta.focus()}
+  else{const lines=ta.value.split("\n").map(x=>x.trim()).filter(Boolean);saveNote(k,field,lines);ta.hidden=true;ul.hidden=false;btn.textContent="편집";ul.innerHTML=lines.length?lines.map(i=>`<li>${i}</li>`).join(""):'<div class="empty">미입력 — 편집을 눌러 입력하세요.</div>';if(ghToken())gsPush();else gsStatus("이 브라우저에 저장됨. 모두에게 반영하려면 아래 'GitHub 자동 저장 설정' 또는 '내려받기'")}};
+const GH_REPO="sttvtts1-gif/tlfwjr";
+window.gsNotesText=function(){const keys=new Set(Object.keys(NOTES));try{for(let i=0;i<localStorage.length;i++){const kk=localStorage.key(i);if(kk&&kk.startsWith("gs-notes-"))keys.add(kk.slice(9))}}catch(e){}
+  const all={};[...keys].sort().forEach(k=>{const o=getNote(k);delete o._pending;delete o._pushedAt;all[k]=o});
+  const head=`/* 월간 발표자료의 "수기 입력" 부분 — 엑셀에 없는 내용만 여기에 적습니다.
+   키는 "YYYY-MM". 없는 달은 해당 섹션이 "미입력"으로 표시됩니다.
+   - pipeline.possible / confirmed : 다음 달 계약 가능건 / 확정건  [상호, 용량(kW), 위치]
+   - pipeline.target               : 다음 달 목표(kW). 비우면 정리base 직영 월목표를 사용
+   - actions / causes / failures / improvements : 개선방안 / 부진 원인 / 실패 사례 / 다음달 개선사항
+   - draft: true                   : 제목 옆에 "초안" 표시
+   ※ 발표 페이지에서 생성 (저장 시 비밀번호로 암호화되어 notes.enc.js로 올라감) (${new Date().toLocaleString("ko-KR")}). */
+`;
+  return head+"window.GS_NOTES = "+JSON.stringify(all,null,2)+";\n";};
+window.gsNotesEncFile=async function(){const enc=await GS_GATE.encrypt(gsNotesText());return "window.GS_ENC_NOTES="+JSON.stringify(enc)+";\n"};
+window.gsDownload=async function(){const txt=await gsNotesEncFile();const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/javascript"}));a.download="notes.enc.js";document.body.appendChild(a);a.click();a.remove();};
+/* GitHub 자동 저장: 토큰이 등록돼 있으면 저장 시 notes.enc.js(암호화)를 저장소에 바로 커밋 */
+const ghToken=()=>{try{return localStorage.getItem("gs-gh-token")||""}catch(e){return ""}};
+window.gsSetup=function(){const cur=ghToken();const t=prompt("GitHub 토큰(fine-grained, 저장소 "+GH_REPO+" · Contents: Read and write)을 붙여넣으세요.\n비우고 확인하면 자동 저장을 끕니다.",cur?"(등록됨 — 바꾸려면 새 토큰 입력)":"");
+  if(t===null)return;if(t===""||t.startsWith("(등록됨")){if(t==="")try{localStorage.removeItem("gs-gh-token")}catch(e){};gsStatus(t===""?"자동 저장 꺼짐":"변경 없음");return}
+  try{localStorage.setItem("gs-gh-token",t.trim())}catch(e){};gsStatus("토큰 등록됨 — 이제 저장하면 GitHub에 바로 반영됩니다");gsPush()};
+/* 파이프라인(가능건/확정건/목표/리뷰) 편집 */
+window.gsPipeEdit=function(btn,k,field){const card=btn.closest(".card, .review"),ta=card.querySelector("textarea"),body=card.querySelector(".pbody");
+  if(ta.hidden){ta.hidden=false;body.hidden=true;btn.textContent="저장";ta.focus();return}
+  const cur=Object.assign({},getNote(k).pipeline||{});
+  if(field==="review"){cur.review=ta.value.split("\n").map(x=>x.trim()).filter(Boolean)}
+  else if(field==="target"){const v=parseFloat(ta.value.replace(/[^0-9.]/g,""));cur.target=isNaN(v)?null:v}
+  else{cur[field]=ta.value.split("\n").map(l=>l.trim()).filter(Boolean).map(parsePipeLine).filter(r=>r&&r[0])}
+  saveNote(k,"pipeline",cur);const y=scrollY;build();scrollTo(0,y);
+  if(ghToken())gsPush();else gsStatus("이 브라우저에 저장됨. 모두에게 반영하려면 09 하단 'GitHub 자동 저장 설정'")};
+/* "상호, 용량, 위치" / "상호<TAB>용량<TAB>위치" / "상호 3700 위치" / "상호3.7mw 위치" 모두 허용. mw·MW는 kW로 환산 */
+window.parsePipeLine=function(l){l=l.replace(/(\d),(\d{3})(?!\d)/g,"$1$2");let p=l.split(/\t|,|\|/).map(x=>x.trim()).filter(Boolean);
+  const num=t=>{const m=String(t).match(/([\d][\d,]*\.?\d*)\s*(mw|kw)?/i);if(!m)return null;let v=parseFloat(m[1].replace(/,/g,""));if(isNaN(v))return null;if(/mw/i.test(m[2]||""))v*=1000;return v};
+  if(p.length>=2&&num(p[1])!=null)return [p[0],num(p[1]),p[2]||""];
+  // 구분자 없음: 이름 뒤에 숫자(+단위) 뒤에 위치
+  const m=l.match(/^(.*?)[\s,]*([\d][\d,]*\.?\d*)\s*(mw|kw)?\s*[,\s]*(.*)$/i);
+  if(m&&m[1].trim()){let v=parseFloat(m[2].replace(/,/g,""));if(/mw/i.test(m[3]||""))v*=1000;return [m[1].trim(),isNaN(v)?0:v,(m[4]||"").trim()]}
+  return [p[0]||l,0,p[2]||""]}
+const pipeEditor=(k,field,rows,ph)=>`<textarea hidden rows="8" style="width:100%;font:inherit;font-size:13px;line-height:1.6;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--surface);color:var(--text-1);margin-top:6px" placeholder="${ph}">${(rows||[]).map(r=>`${r[0]}, ${r[1]}, ${r[2]||""}`).join("\n")}</textarea>`;
+/* 실적 리뷰 정리(09) → PDF 파일 저장 (A4 세로, 1쪽: 리뷰 ①~④ / 2쪽: 분석·실패사례·개선사항) */
+const loadScript=(src,test)=>new Promise((ok,no)=>{if(test())return ok();const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+window.gsPdf=async function(){
+  const Y=Math.floor(cur/100),M=cur%100,name=`그랜드썬_실적리뷰_${Y}-${String(M).padStart(2,"0")}.pdf`;
+  gsStatus("PDF 만드는 중… (몇 초 걸립니다)");
+  try{await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",()=>window.html2canvas);
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",()=>window.jspdf)}
+  catch(e){gsStatus("PDF 도구를 불러오지 못해 인쇄창을 엽니다 — 대상에서 'PDF로 저장'을 고르세요");return gsPrintWrap()}
+  const root=document.documentElement,prevTheme=root.dataset.theme;root.dataset.theme="light";
+  const wrap=document.getElementById("wrap"),box=document.createElement("div");box.className="pdfbox";document.body.appendChild(box);
+  const today=new Date().toLocaleDateString("ko-KR");
+  const mkPage=(title,node,pg)=>{const p=document.createElement("div");p.className="pdfpage";
+    p.innerHTML=`<div class="pdfhead"><b>GRAND SUN</b><span class="t">${title}</span><span class="m">직영 기준 · 단위 kW · 출력 ${today} · ${pg}</span></div>`;
+    const c=node.cloneNode(true);c.querySelectorAll(".ic,textarea,.note").forEach(x=>x.remove());c.querySelectorAll("[hidden]").forEach(x=>x.hidden=false);p.appendChild(c);box.appendChild(p);return p};
+  const pages=[mkPage(`${Y}년 ${M}월 실적 리뷰 정리`,wrap.querySelector(".grid.rv"),"1/2"),mkPage(`${Y}년 ${M}월 실적 분석 · 실패 사례 · 개선사항`,wrap.querySelector(".grid.ed"),"2/2")];
+  try{const {jsPDF}=window.jspdf,pdf=new jsPDF({unit:"mm",format:"a4",orientation:"portrait"}),PW=210,PH=297,MG=8;
+    for(let i=0;i<pages.length;i++){const cv=await html2canvas(pages[i],{scale:2,backgroundColor:"#ffffff",useCORS:true,scrollX:0,scrollY:0,windowWidth:1200});
+      let w=PW-MG*2,h=cv.height*w/cv.width;if(h>PH-MG*2){h=PH-MG*2;w=cv.width*h/cv.height}
+      if(i)pdf.addPage();pdf.addImage(cv.toDataURL("image/jpeg",0.95),"JPEG",(PW-w)/2,MG,w,h)}
+    pdf.save(name);gsStatus("PDF 저장 완료 — 다운로드 폴더의 "+name)}
+  catch(e){gsStatus("PDF 저장 실패: "+e.message+" — 인쇄창으로 대신 저장하세요",true)}
+  box.remove();if(prevTheme)root.dataset.theme=prevTheme;else delete root.dataset.theme};
+window.gsPrintWrap=function(){document.body.classList.add("printwrap");setTimeout(()=>{window.print();document.body.classList.remove("printwrap")},100)};
+window.gsStatus=function(msg,err){let el=document.getElementById("gs-status");if(!el){el=document.createElement("div");el.id="gs-status";el.style.cssText="position:fixed;right:16px;bottom:16px;z-index:9999;background:var(--text-1);color:var(--surface);padding:10px 14px;border-radius:8px;font-size:13px;max-width:360px;box-shadow:0 6px 24px rgba(0,0,0,.2)";document.body.appendChild(el)}
+  el.textContent=msg;el.style.background=err?"#c43c3b":"";el.style.color=err?"#fff":"";clearTimeout(el._t);el._t=setTimeout(()=>el.remove(),err?8000:4000)};
+let _pushing=false,_pushAgain=false;
+window.gsPush=async function(){const tok=ghToken();if(!tok)return false;
+  if(_pushing){_pushAgain=true;return true}  // 저장 중이면 끝난 뒤 한 번 더
+  _pushing=true;gsStatus("GitHub에 저장 중…");
+  const api=`https://api.github.com/repos/${GH_REPO}/contents/notes.enc.js`,h={Authorization:"Bearer "+tok,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
+  const getSha=async()=>{const r=await fetch(api+"?ref=main&t="+Date.now(),{headers:h,cache:"no-store"});if(r.ok)return (await r.json()).sha;if(r.status===404)return undefined;throw new Error("읽기 실패 "+r.status+(r.status===401?" (토큰 오류)":r.status===403?" (권한 없음)":""))};
+  const encTxt=await gsNotesEncFile();const put=async(sha)=>{const bytes=new TextEncoder().encode(encTxt);let bin="";bytes.forEach(b=>bin+=String.fromCharCode(b));
+    const body={message:"notes: 발표 페이지에서 수정 ("+new Date().toLocaleString("ko-KR")+")",content:btoa(bin),branch:"main"};if(sha)body.sha=sha;
+    return fetch(api,{method:"PUT",headers:h,body:JSON.stringify(body)})};
+  let ok=false;
+  try{let w=await put(await getSha());
+    for(let i=0;i<3&&w.status===409;i++){await new Promise(r=>setTimeout(r,1200));w=await put(await getSha())}  // 최신 sha로 재시도
+    if(!w.ok){const e=await w.json().catch(()=>({}));throw new Error("저장 실패 "+w.status+" "+(e.message||""))}
+    gsStatus("GitHub에 저장 완료 — 1~2분 뒤 모든 기기에 반영됩니다");markPushed();ok=true}
+  catch(e){gsStatus("GitHub 저장 실패: "+e.message+" — '지금 다시 저장'을 눌러보세요",true)}
+  _pushing=false;if(_pushAgain){_pushAgain=false;return gsPush()}return ok};
+window.gsCopy=function(k){const o=Object.assign({},NOTES[k]||{},LS(k)||{});const txt=`"${k}": `+JSON.stringify(o,null,2);navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>alert("notes.js에 붙여넣을 내용을 복사했습니다.\n(이 브라우저에만 저장된 편집 내용을 모든 사람에게 보이게 하려면 notes.js에 반영해야 합니다)"),()=>prompt("복사:",txt))};
+const editCard=(k,field,items,title,draft)=>`<div class="card edc"><div class="rvh"><div><b>${title}</b>${draft&&items&&items.length?`<small class="warn">초안 — 발표 전 수정</small>`:""}</div><button class="ic" onclick="gsEdit(this,'${k}','${field}')">편집</button></div><ol class="items">${items&&items.length?items.map(i=>`<li>${i}</li>`).join(""):'<div class="empty">미입력 — 편집을 눌러 입력하세요.</div>'}</ol><textarea hidden rows="8" placeholder="한 줄에 하나씩 입력">${(items||[]).join("\n")}</textarea></div>`;
+const editBox=(k,field,items,title,hint)=>`<div class="review"><b style="display:flex;justify-content:space-between;align-items:center">${title}<span><button class="ic" style="padding:2px 8px;font-size:11px" onclick="gsEdit(this,'${k}','${field}')">편집</button></span></b>${hint?`<div class="note" style="margin:0 0 6px">${hint}</div>`:""}<ul class="items">${items&&items.length?items.map(i=>`<li>${i}</li>`).join(""):'<div class="empty">미입력 — 편집을 눌러 입력하세요.</div>'}</ul><textarea hidden rows="6" style="width:100%;font:inherit;font-size:13px;border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--surface);color:var(--text-1)" placeholder="한 줄에 하나씩 입력">${(items||[]).join("\n")}</textarea></div>`;
+const MON=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+const fmt=(n,d=0)=>n==null||isNaN(n)?"–":Number(n).toLocaleString("ko-KR",{maximumFractionDigits:d,minimumFractionDigits:d});
+const mw=n=>fmt(n/1000,1)+"MW";
+const pct=(a,b)=>b?a/b*100:0;
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const rateCls=r=>r>=100?"good":r>=80?"warn":"bad";
+const pill=r=>r==null?"":`<span class="pill ${rateCls(r)}">${r>=100?"▲":r>=80?"●":"▼"} ${fmt(r,2)}% ${r>=100?"달성":r>=80?"근접":"미달"}</span>`;
+const reviewBox=(items,t="리뷰")=>`<div class="review"><b>${t}</b>${items&&items.length?`<ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>`:`<div class="empty">미입력 — "편집"으로 내용을 입력하면 표시됩니다.</div>`}</div>`;
+const legend=items=>`<div class="legend">${items.map(([l,c])=>`<span style="--c:var(${c})">${l}</span>`).join("")}</div>`;
+const sum=a=>a.reduce((x,r)=>x+r.cap,0);
+const BR={안성지사:"경기",부산지사:"부산"};
+
+/* ---- month selection ---- */
+const months=[...new Set(ROWS.map(r=>r.y*100+r.m))].sort((a,b)=>b-a);
+const sel=document.getElementById("monthSel");
+sel.innerHTML=months.map(k=>`<option value="${k}">${Math.floor(k/100)}년 ${MON[k%100-1]}</option>`).join("");
+let cur=months[0];
+try{const q=new URLSearchParams(location.search).get("m");if(q&&months.includes(+q))cur=+q}catch(e){}
+sel.value=cur;sel.onchange=()=>{cur=+sel.value;history.replaceState(null,"","?m="+cur);build()};
+
+/* ---- helpers ---- */
+const rows=(y,m,ch)=>ROWS.filter(r=>r.y===y&&(m==null||r.m===m)&&(ch==null||r.ch===ch));
+const tgt=(y,ch,m)=>((TG[y]||{})[ch]||[])[m-1]||0;
+const tgtCum=(y,ch,m)=>Array.from({length:m},(_,i)=>tgt(y,ch,i+1)).reduce((a,b)=>a+b,0);
+const tgtAll=(y,m)=>["직영","외주","입찰"].reduce((a,c)=>a+tgt(y,c,m),0);
+const tgtAllCum=(y,m)=>["직영","외주","입찰"].reduce((a,c)=>a+tgtCum(y,c,m),0);
+const by=(R,key)=>{const o={};R.forEach(r=>{const k=r[key]||"(없음)";o[k]=o[k]||{cap:0,n:0};o[k].cap+=r.cap;o[k].n++});return o};
+const typeLabel=t=>t==="기타(Z)"?"기타(건물지원 등)":t;
+
+function build(){
+  const Y=Math.floor(cur/100), M=cur%100, pY=M===1?Y-1:Y, pM=M===1?12:M-1, lastY=Y-1;
+  const cm=rows(Y,M,"직영"), pm=rows(pY,pM,"직영"), ly=rows(lastY,M,"직영");
+  const cap=sum(cm), pcap=sum(pm), lcap=sum(ly), T=tgt(Y,"직영",M), pT=tgt(pY,"직영",pM), lT=tgt(lastY,"직영",M);
+  const cumR=rows(Y,null,"직영").filter(r=>r.m<=M), cum=sum(cumR), cumT=tgtCum(Y,"직영",M);
+  const lcumR=rows(lastY,null,"직영").filter(r=>r.m<=M), lcum=sum(lcumR), lcumT=tgtCum(lastY,"직영",M);
+  const allCumR=rows(Y).filter(r=>r.m<=M), allCum=sum(allCumR), allCumT=tgtAllCum(Y,M);
+  const lallCumR=rows(lastY).filter(r=>r.m<=M), lallCum=sum(lallCumR), lallCumT=tgtAllCum(lastY,M);
+  const br=by(cm,"br"), pbr=by(pm,"br");
+  const inf=by(cm,"inflow"), pinf=by(pm,"inflow"), linf=by(ly,"inflow");
+  const typ=by(cm,"t"), ptyp=by(pm,"t");
+  const ppl=by(cm,"own"), pplCum=by(cumR,"own");
+  const owners=Object.keys(pplCum).sort((a,b)=>pplCum[b].cap-pplCum[a].cap);
+  const q=Math.ceil(M/3), qMs=[(q-1)*3+1,(q-1)*3+2,(q-1)*3+3].filter(m=>m<=M);
+  const qRows=qMs.map(m=>({m,target:tgt(Y,"직영",m),actual:sum(rows(Y,m,"직영")),cnt:rows(Y,m,"직영").length}));
+  const qT=qMs.reduce((a,m)=>a+tgt(Y,"직영",m),0), qA=qRows.reduce((a,r)=>a+r.actual,0), qN=qRows.reduce((a,r)=>a+r.cnt,0);
+  const y26=Array.from({length:12},(_,i)=>i+1<=M?sum(rows(Y,i+1,"직영")):null), y25=Array.from({length:12},(_,i)=>sum(rows(lastY,i+1,"직영"))||null);
+  const avg=cum/M, fc=Array.from({length:12},(_,i)=>i+1>M?avg:null), annT=tgtCum(Y,"직영",12);
+  const estA=cum+avg*(12-M), estB=cum+Array.from({length:12-M},(_,i)=>tgt(Y,"직영",M+1+i)).reduce((a,b)=>a+b,0);
+  const lastYear=sum(rows(lastY,null,"직영")), lastYtd=lcum;
+  const NK=`${Y}-${String(M).padStart(2,"0")}`, note=getNote(NK), pipe=note.pipeline||{}, nM=M===12?1:M+1, nY=M===12?Y+1:Y, nT=pipe.target||tgt(nY,"직영",nM);
+  const posSum=(pipe.possible||[]).reduce((a,r)=>a+(+r[1]||0),0), conSum=(pipe.confirmed||[]).reduce((a,r)=>a+(+r[1]||0),0);
+  const label=`${Y}년 ${MON[M-1]}`;
+  document.getElementById("periodLabel").textContent=label+" · 직영 기준 · 단위 kW";
+  document.title=`${label} 실적 발표`;
+  const g=(o,k)=>o[k]||{cap:0,n:0};
+
+  const slides=[
+   {id:"cover",nav:"표지",html:()=>`<div class="cover" style="min-height:calc(100vh - 140px)"><div class="eyebrow">GRAND SUN · 실적발표</div><h1>${label} 실적 보고</h1><p>직영 기준 · 단위 kW · 엑셀 데이터 자동 집계 (${new Date().toLocaleDateString("ko-KR")} 기준)</p>
+     <div class="grid g4">${kpi(MON[M-1]+" 실적",cap,"kW",`목표 ${fmt(T)}kW · ${cm.length}건`,pct(cap,T))}${kpi(`${Y%100}년 누적`,cum,"kW",`목표 ${fmt(cumT)}kW · ${cumR.length}건`,pct(cum,cumT),1)}${kpi(`${q}분기 실적`,qA,"kW",`목표 ${fmt(qT)}kW · ${qN}건`,pct(qA,qT))}${kpiDelta("전월 대비",cap-pcap,`${MON[pM-1]} ${fmt(pcap)}kW → ${MON[M-1]} ${fmt(cap)}kW`,pcap?pct(cap-pcap,pcap):null)}</div></div>`},
+   {id:"perf",nav:"실적",html:()=>`<div class="eyebrow">01</div><h2>${label} 분석 (실적, 전월대비)</h2>
+     <div class="grid g3">${kpi("전체",cap,"kW",`목표 ${fmt(T)}kW · ${cm.length}건 · 전월 ${fmt(pcap)}kW`,pct(cap,T))}${["부산지사","안성지사"].map(b=>kpi(BR[b]+` (${b})`,g(br,b).cap,"kW",`${g(br,b).n}건 · 전월 ${fmt(g(pbr,b).cap)}kW`,null)).join("")}</div>
+     <div class="grid g2" style="margin-top:14px"><div class="card"><h3>목표 · 당월 · 전월 (kW)</h3>${legend([["목표","--s-target"],[MON[M-1],"--s-actual"],["전월("+MON[pM-1]+")","--s-prev"]])}<div class="chart"><canvas id="c_perf"></canvas></div></div>
+     <div class="card"><h3>지사별 당월 비중</h3>${split([["부산지사",g(br,"부산지사").cap,"--s-actual"],["안성지사",g(br,"안성지사").cap,"--s-prev"]])}<div class="chart"><canvas id="c_br"></canvas></div></div></div>
+     ${reviewBox([`${pY%100}.${pM}월 목표 ${mw(pT)} → ${mw(pcap)} (${fmt(pct(pcap,pT),2)}% 달성)`,`${Y%100}.${M}월 목표 ${mw(T)} → ${mw(cap)} (${fmt(pct(cap,T),2)}% 달성)`,`${Y%100}년 누적 목표 ${mw(cumT)} → ${M}월 누적 ${mw(cum)} (${fmt(pct(cum,cumT),2)}%) [${cum>=cumT?"+":"-"}${mw(Math.abs(cum-cumT))} ${cum>=cumT?"초과":"부족"}]`,`${M}월 전월(${pM}월) 대비 ${cap-pcap>=0?"+":""}${fmt(cap-pcap)}kW (${pcap?(cap-pcap>=0?"+":"")+fmt(pct(cap-pcap,pcap),2)+"%":"–"})`,`부산지사 ${fmt(g(br,"부산지사").cap)}kW/${g(br,"부산지사").n}건 · 안성지사 ${fmt(g(br,"안성지사").cap)}kW/${g(br,"안성지사").n}건`].concat(note.extraReview||[]))}
+     <div class="note">지사별 목표는 엑셀(정리base)에 없어 표시하지 않습니다.</div>`},
+   {id:"inflow",nav:"유입",html:()=>`<div class="eyebrow">02</div><h2>${label} 분석 (유입)</h2>
+     <div class="grid g2"><div class="card"><h3>용량 기준 (전체 ${fmt(cap,2)}kW)</h3>${split([["직접",g(inf,"직접").cap,"--s-actual"],["소개",g(inf,"소개").cap,"--s-prev"]],v=>fmt(v)+"kW")}<div class="chart"><canvas id="c_inC"></canvas></div></div>
+     <div class="card"><h3>건수 기준 (전체 ${cm.length}건)</h3>${split([["직접",g(inf,"직접").n,"--s-actual"],["소개",g(inf,"소개").n,"--s-prev"]],v=>v+"건")}<div class="chart"><canvas id="c_inN"></canvas></div></div></div>
+     ${reviewBox([`전체용량의 직접비중 ${pM}월 ${fmt(pct(g(pinf,"직접").cap,pcap),2)}% / 소개비중 ${fmt(pct(g(pinf,"소개").cap,pcap),2)}%`,`전체용량의 직접비중 ${M}월 ${fmt(pct(g(inf,"직접").cap,cap),2)}% / 소개비중 ${fmt(pct(g(inf,"소개").cap,cap),2)}%`,`계약건수의 ${pM}월 직접비중 ${fmt(pct(g(pinf,"직접").n,pm.length),2)}% / 소개비중 ${fmt(pct(g(pinf,"소개").n,pm.length),2)}%`,`계약건수의 ${M}월 직접비중 ${fmt(pct(g(inf,"직접").n,cm.length),2)}% / 소개비중 ${fmt(pct(g(inf,"소개").n,cm.length),2)}%`])}`},
+   {id:"type",nav:"계약타입",html:()=>`<div class="eyebrow">03</div><h2>${label} 분석 (계약타입)</h2>
+     <div class="grid g2"><div class="card"><h3>타입별 용량 (kW)</h3><div class="chart"><canvas id="c_tC"></canvas></div></div><div class="card"><h3>타입별 건수</h3><div class="chart"><canvas id="c_tN"></canvas></div></div></div>
+     ${reviewBox([`${pM}월 전체 계약 중 `+Object.keys(ptyp).map(t=>`${typeLabel(t)} ${fmt(pct(ptyp[t].cap,pcap),2)}%`).join(" · "),`${M}월 전체 계약 중 `+Object.keys(typ).sort((a,b)=>typ[b].cap-typ[a].cap).map(t=>`${typeLabel(t)} ${fmt(pct(typ[t].cap,cap),2)} (${typ[t].n}건)`).join(" · ")].concat(Object.keys(typ).filter(t=>t==="기타(Z)").map(t=>"기타(Z): "+cm.filter(r=>r.t===t).map(r=>`${r.name} ${fmt(r.cap)}kW`).join(", "))))}`},
+   {id:"people",nav:"개인별",html:()=>`<div class="eyebrow">04</div><h2>${label} / 누적 실적 (개인별·전체)</h2>
+     <div class="grid g2"><div class="card"><h3>${MON[M-1]} 용량 (kW)</h3><div class="chart"><canvas id="c_pM"></canvas></div></div><div class="card"><h3>${Y%100}년 누적 용량 (kW)</h3><div class="chart"><canvas id="c_pC"></canvas></div></div></div>
+     <div class="card" style="margin-top:14px"><div class="tblwrap"><table><thead><tr><th>담당</th><th>${MON[M-1]} 용량(kW)</th><th>${MON[M-1]} 건수</th><th>누적 용량(kW)</th><th>누적 건수</th></tr></thead><tbody>
+     ${owners.map(o=>`<tr><td>${o}</td><td>${fmt(g(ppl,o).cap,1)}</td><td>${g(ppl,o).n}</td><td>${fmt(g(pplCum,o).cap,1)}</td><td>${g(pplCum,o).n}</td></tr>`).join("")}
+     <tr class="tot"><td>직영 전체</td><td>${fmt(cap,1)}</td><td>${cm.length}</td><td>${fmt(cum,1)}</td><td>${cumR.length}</td></tr></tbody></table></div></div>
+     ${reviewBox(owners.filter(o=>g(ppl,o).n||g(pplCum,o).n).slice(0,6).map((o,i)=>`${o} – ${M}월 ${mw(g(ppl,o).cap)}/${g(ppl,o).n}건${g(ppl,o).cap===Math.max(...owners.map(x=>g(ppl,x).cap))&&g(ppl,o).cap>0?` (${M}월 1위)`:""}, 누적 ${mw(g(pplCum,o).cap)}/${g(pplCum,o).n}건${i===0?" (누적 1위)":""}`).concat([`직영 전체 ${Y%100}년 누적 – ${mw(cum)}/${cumR.length}건`,`전사 전체(직영+외주+입찰) 누적 – ${mw(allCum)}/${allCumR.length}건`]))}`},
+   {id:"quarter",nav:"분기",html:()=>`<div class="eyebrow">05</div><h2>${Y}년도 ${q}분기 실적 (${MON[qMs[0]-1]}~${MON[qMs[qMs.length-1]-1]})</h2>
+     <div class="grid g2"><div class="card"><h3>직영 월별 목표 · 실적 (kW)</h3>${legend([["목표","--s-target"],["실적","--s-actual"]])}<div class="chart"><canvas id="c_q"></canvas></div></div>
+     <div class="card"><h3>직영 ${q}분기 실적표</h3><div class="tblwrap"><table><thead><tr><th>구분</th><th>목표</th><th>실적</th><th>건수</th><th>달성율</th></tr></thead><tbody>${qRows.map(r=>`<tr><td>${MON[r.m-1]}</td><td>${fmt(r.target)}</td><td>${fmt(r.actual)}</td><td>${r.cnt}건</td><td>${pill(pct(r.actual,r.target))}</td></tr>`).join("")}<tr class="tot"><td>${q}분기 계</td><td>${fmt(qT)}</td><td>${fmt(qA)}</td><td>${qN}건</td><td>${pill(pct(qA,qT))}</td></tr></tbody></table></div><div class="note">단위: kW · 직영(가) 기준 · 목표: 정리base 시트 직영 월별 목표${qMs.length<3?` · ${q}분기 진행 중(${qMs.length}개월)`:""}</div></div></div>
+     ${reviewBox([`${q}분기 직영 ${mw(qA)}/${qN}건 (목표 ${mw(qT)} 대비 ${fmt(pct(qA,qT),2)}%)`,`직영 달성율 `+qRows.map(r=>`${MON[r.m-1]} ${fmt(pct(r.actual,r.target),2)}%`).join(" · "),`${q}분기 목표 대비 ${qA>=qT?"초과분":"부족분"} ${fmt(Math.abs(qA-qT))}kW`])}`},
+   {id:"trend",nav:"추이·예상",html:()=>`<div class="eyebrow">06</div><h2>${lastY}·${Y}년 월별 계약용량 추이 및 예상</h2>
+     <div class="grid" style="grid-template-columns:2fr 1fr"><div class="card"><h3>월별 계약용량 (kW)</h3>${legend([[lastY+"년 실적","--s-prev"],[Y+"년 실적","--s-actual"],[`${Y}년 예상 A (1~${M}월 월평균)`,"--s-fcst"]])}<div class="chart tall"><canvas id="c_tr"></canvas></div></div>
+     <div class="card"><h3>요약 (kW)</h3><table><tbody>${[[`${lastY}년 1~${M}월 실적`,fmt(lastYtd)],[`${Y}년 1~${M}월 실적`,fmt(cum)],["전년 동기 대비",`${cum-lastYtd>=0?"+":""}${fmt(cum-lastYtd)} (${lastYtd?(cum-lastYtd>=0?"+":"")+fmt(pct(cum-lastYtd,lastYtd),1)+"%":"–"})`],[`${lastY}년 연간 실적`,fmt(lastYear)],[`${Y}년 예상 A (${M+1}~12월=1~${M}월 월평균)`,fmt(estA)],[`${Y}년 예상 B (${M+1}~12월=월 목표용량 달성)`,fmt(estB)]].map(r=>`<tr><td class="l">${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</tbody></table></div></div>
+     ${reviewBox([`${lastY}년 직영 연간 ${fmt(lastYear)}kW (최대 ${MON[y25.indexOf(Math.max(...y25.filter(v=>v!=null)))]} ${fmt(Math.max(...y25.filter(v=>v!=null)))} / 최소 ${MON[y25.indexOf(Math.min(...y25.filter(v=>v!=null)))]} ${fmt(Math.min(...y25.filter(v=>v!=null)))}kW)`,`${Y}년 1~${M}월 ${fmt(cum)}kW (전년 동기 대비 ${cum-lastYtd>=0?"+":""}${fmt(pct(cum-lastYtd,lastYtd),1)}%) · 최대 ${MON[y26.indexOf(Math.max(...y26.filter(v=>v!=null)))]} ${fmt(Math.max(...y26.filter(v=>v!=null)))} / 최소 ${MON[y26.indexOf(Math.min(...y26.filter(v=>v!=null)))]} ${fmt(Math.min(...y26.filter(v=>v!=null)))}kW`,`예상 A: ${M+1}~12월 월 ${fmt(avg)}kW → 연간 ${fmt(estA)}kW (목표 ${mw(annT)} 대비 ${fmt(pct(estA,annT),1)}%)`,`예상 B: ${Array.from({length:12-M},(_,i)=>`${M+1+i}월 ${fmt(tgt(Y,"직영",M+1+i))}`).join(" · ")}kW → 연간 ${fmt(estB)}kW (${fmt(pct(estB,annT),1)}%)`,`※ ${Y%100}년 직영 연간 목표 ${fmt(annT)}kW (정리base 시트)`])}`},
+   {id:"pipe",nav:"다음달 파이프라인",html:()=>`<div class="eyebrow">07</div><h2>${nY}년 ${MON[nM-1]} 계약 가능건 및 확정건</h2>
+     <div class="grid g3" style="margin-bottom:14px">${kpi(`${MON[nM-1]} 목표`,nT,"kW",pipe.target?"직접 입력한 목표":"정리base 직영 월목표",null)}${kpi("계약 확정건",conSum,"kW",`${(pipe.confirmed||[]).length}건 · 목표 대비 ${fmt(pct(conSum,nT),1)}%`,null)}${kpi("계약 가능건",posSum,"kW",`${(pipe.possible||[]).length}건 · 확정+가능 ${fmt(pct(posSum+conSum,nT),1)}%`,null)}</div>
+     <div class="grid g2">${pipeTable("계약 가능건",pipe.possible||[],posSum,"possible")}${pipeTable("계약 확정건",pipe.confirmed||[],conSum,"confirmed")}</div>
+     <div class="review"><b style="display:flex;justify-content:space-between;align-items:center">리뷰 <span style="display:flex;gap:6px"><button class="ic" style="padding:2px 8px;font-size:11px" onclick="gsPipeEdit(this,'${NK}','review')">편집</button></span></b>
+       <div class="pbody">${(()=>{const auto=posSum+conSum?[`가능건을 ${MON[nM-1]} 내 계약할 수 있도록 집중 (목표 ${fmt(nT)}kW)`,`가능건 및 확정건 100% 달성 시 ${MON[nM-1]} 목표 ${fmt(pct(posSum+conSum,nT),2)}% + @ 달성`,`가능건 및 확정건 50% 달성 시 ${MON[nM-1]} 목표 ${fmt(pct((posSum+conSum)/2,nT),2)}% + @ 달성`]:[];const items=(pipe.review&&pipe.review.length)?pipe.review:auto;return items.length?`<ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>${pipe.review&&pipe.review.length?"":'<div class="note">자동 생성 문구 — 편집하면 입력한 내용으로 바뀝니다</div>'}`:'<div class="empty">가능건·확정건을 입력하면 자동으로 채워집니다. 직접 쓰려면 편집을 누르세요.</div>'})()}</div>
+       <textarea hidden rows="4" style="width:100%;font:inherit;font-size:13px;line-height:1.6;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--surface);color:var(--text-1);margin-top:6px" placeholder="한 줄에 하나씩">${(pipe.review||[]).join("\n")}</textarea></div>
+     <div class="note" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${MON[nM-1]} 목표를 바꾸려면 <button class="ic" style="padding:2px 8px;font-size:11px" onclick="const v=prompt('${MON[nM-1]} 목표 (kW). 비우면 정리base 월목표 사용',${pipe.target||""});if(v===null)return;const c=Object.assign({},getNote('${NK}').pipeline||{});const n=parseFloat(String(v).replace(/[^0-9.]/g,''));c.target=isNaN(n)?null:n;saveNote('${NK}','pipeline',c);const y=scrollY;build();scrollTo(0,y);if(ghToken())gsPush()">목표 수정</button></div>`},
+   {id:"sum",nav:"종합·개선",html:()=>`<div class="eyebrow">08</div><h2>${MON[M-1]} 종합분석 및 개선방안</h2>
+     <div class="grid g2"><div class="card"><div class="tblwrap"><table><thead><tr><th></th><th class="l">${Y%100}년 ${M}월</th><th class="l">전월기준(${pM}월)</th><th class="l">전년기준(${M}월)</th></tr></thead><tbody>
+       <tr><td>목표</td><td class="l">${mw(T)}</td><td class="l">${mw(pT)}</td><td class="l">${mw(lT)}</td></tr>
+       <tr><td>실적(달성율)</td><td class="l">${mw(cap)} (${fmt(pct(cap,T),2)}%)</td><td class="l">${mw(pcap)} (${fmt(pct(pcap,pT),2)}%)</td><td class="l">${mw(lcap)} (${fmt(pct(lcap,lT),2)}%)</td></tr>
+       <tr><td>마케팅/소개비율</td>${[[inf,cap],[pinf,pcap],[linf,lcap]].map(([o,c])=>`<td class="l">${fmt(g(o,"직접").cap)}kW (${fmt(pct(g(o,"직접").cap,c),2)}%, ${g(o,"직접").n}건) / ${fmt(g(o,"소개").cap)}kW (${fmt(pct(g(o,"소개").cap,c),2)}%, ${g(o,"소개").n}건)</td>`).join("")}</tr></tbody></table></div></div>
+     <div class="card"><div class="tblwrap"><table><thead><tr><th></th><th class="l">${Y%100}년 누적(${M}월까지)</th><th class="l">${lastY%100}년 누적(${M}월까지)</th><th class="l">비고</th></tr></thead><tbody>
+       <tr><td>직영 목표</td><td class="l">${mw(cumT)}</td><td class="l">${mw(lcumT)}</td><td></td></tr>
+       <tr><td>직영 실적(달성율)</td><td class="l">${mw(cum)} (${fmt(pct(cum,cumT),2)}%)</td><td class="l">${mw(lcum)} (${fmt(pct(lcum,lcumT),2)}%)</td><td></td></tr>
+       <tr><td>전체 목표</td><td class="l">${mw(allCumT)}</td><td class="l">${mw(lallCumT)}</td><td class="l">직영+외주+입찰</td></tr>
+       <tr><td>전체 실적(달성율)</td><td class="l">${mw(allCum)} (${fmt(pct(allCum,allCumT),2)}%)</td><td class="l">${mw(lallCum)} (${fmt(pct(lallCum,lallCumT),2)}%)</td><td class="l">직영+외주+입찰</td></tr></tbody></table></div></div></div>
+     ${editBox(NK,"actions",note.actions,"개선방안")}`},
+   {id:"wrap",nav:"실적 리뷰 정리",html:()=>{
+     const dd=(a,b,u="kW",dec=0)=>{const x=b-a;return `<span class="${x>0?"good":x<0?"bad":"mut"}">${x>0?"+":x<0?"−":""}${fmt(Math.abs(x),dec)}${u}${a?` <small>(${x>=0?"+":""}${fmt(pct(x,a),1)}%)</small>`:""}</span>`};
+     const dp=(a,b)=>{const x=b-a;return `<span class="${x>0?"good":x<0?"bad":"mut"}">${x>0?"+":x<0?"−":""}${fmt(Math.abs(x),2)}%p</span>`};
+     const top=owners.filter(o=>g(ppl,o).cap>0).sort((a,b)=>g(ppl,b).cap-g(ppl,a).cap);
+     const big=cm.slice().sort((a,b)=>b.cap-a.cap)[0];
+     const qs=[1,2,3,4].filter(qq=>(qq-1)*3+1<=M).map(qq=>{const ms=[1,2,3].map(i=>(qq-1)*3+i).filter(m=>m<=M);const a=ms.reduce((x,m)=>x+sum(rows(Y,m,"직영")),0),t=ms.reduce((x,m)=>x+tgt(Y,"직영",m),0);return [qq,pct(a,t)]});
+     const hitM=Array.from({length:M},(_,i)=>i+1).filter(m=>sum(rows(Y,m,"직영"))>=tgt(Y,"직영",m)), missM=Array.from({length:M},(_,i)=>i+1).filter(m=>!hitM.includes(m));
+     const vals=y26.filter(v=>v!=null), mxM=y26.indexOf(Math.max(...vals)), mnM=y26.indexOf(Math.min(...vals));
+     const lbr=by(ly,"br"), lppl=by(ly,"own"), lcumPpl=by(lcumR,"own"), cinf=by(cumR,"inflow"), lcinf=by(lcumR,"inflow");
+     const first=o=>Object.keys(o).sort((a,b)=>o[b].cap-o[a].cap)[0]||"–";
+     const kv=(rows)=>`<table class="kv">${rows.map(r=>`<tr><th>${r[0]}</th><td>${r[1]}</td>${r[2]!=null?`<td class="sub">${r[2]}</td>`:""}</tr>`).join("")}</table>`;
+     const cmp=(rows)=>`<table class="cmp"><thead><tr><th></th><th>${lastY}년</th><th>${Y}년</th><th>증감</th></tr></thead><tbody>${rows.map(r=>`<tr><th>${r[0]}</th><td>${r[1]}</td><td class="now">${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+     const head=(n,t,sub)=>`<div class="rvh"><div><span class="num">${n}</span><div><b>${t}</b>${sub?`<small>${sub}</small>`:""}</div></div></div>`;
+     const stat=(l,v,u,s)=>`<div class="st"><small>${l}</small><b>${v}<i>${u||""}</i></b>${s?`<em>${s}</em>`:""}</div>`;
+     return `<div class="eyebrow">09</div><h2 style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">${label} 실적 리뷰 정리<button class="ic pdfbtn" onclick="gsPdf()" style="font-size:13px;padding:7px 14px;font-weight:500">⬇ PDF로 저장</button></h2>
+     <div class="grid g2 rv">
+      <div class="card">${head("①",`${MON[M-1]} 실적 리뷰`,"직영 기준")}
+        <div class="stats">${stat("목표",fmt(T),"kW")}${stat("실적",fmt(cap),"kW",`${cm.length}건`)}${stat("달성율",fmt(pct(cap,T),1),"%",`${cap>=T?"초과":"부족"} ${fmt(Math.abs(cap-T))}kW`)}${stat("전월 대비",(cap-pcap>=0?"+":"−")+fmt(Math.abs(cap-pcap)),"kW",pcap?`${cap-pcap>=0?"+":""}${fmt(pct(cap-pcap,pcap),1)}%`:"")}</div>
+        ${kv([
+          ["건당 평균",`${fmt(cap/(cm.length||1))}kW`,`전월 ${fmt(pcap/(pm.length||1))}kW`],
+          ["지사",`부산 ${fmt(g(br,"부산지사").cap)}kW · ${g(br,"부산지사").n}건`,`안성 ${fmt(g(br,"안성지사").cap)}kW · ${g(br,"안성지사").n}건`],
+          ["유입",`직접 ${fmt(pct(g(inf,"직접").cap,cap),1)}% · 소개 ${fmt(pct(g(inf,"소개").cap,cap),1)}%`,`전월 직접 ${fmt(pct(g(pinf,"직접").cap,pcap),1)}% · 소개 ${fmt(pct(g(pinf,"소개").cap,pcap),1)}%`],
+          ["타입",Object.keys(typ).sort((a,b)=>typ[b].cap-typ[a].cap).map(t=>`${typeLabel(t)} ${fmt(typ[t].cap)}`).join(" · ")+"kW",null],
+          ["담당자",top.length?`1위 ${top[0]} ${mw(g(ppl,top[0]).cap)} · ${g(ppl,top[0]).n}건`:"–",top.length>1?`2위 ${top[1]} ${mw(g(ppl,top[1]).cap)}`:""],
+          ["최대 계약",big?`${big.name} ${fmt(big.cap)}kW`:"–",big?`${big.own} · ${big.reg}`:""]
+        ])}</div>
+      <div class="card">${head("③",`전년 동월 비교`,`${lastY}년 ${MON[M-1]} vs ${Y}년 ${MON[M-1]}`)}
+        ${cmp([
+          ["목표",fmt(lT)+"kW",fmt(T)+"kW",dd(lT,T)],
+          ["실적",fmt(lcap)+"kW",fmt(cap)+"kW",dd(lcap,cap)],
+          ["달성율",fmt(pct(lcap,lT),1)+"%",fmt(pct(cap,T),1)+"%",dp(pct(lcap,lT),pct(cap,T))],
+          ["계약 건수",ly.length+"건",cm.length+"건",dd(ly.length,cm.length,"건")],
+          ["건당 평균",fmt(lcap/(ly.length||1))+"kW",fmt(cap/(cm.length||1))+"kW",dd(lcap/(ly.length||1),cap/(cm.length||1))],
+          ["소개 비중",fmt(pct(g(linf,"소개").cap,lcap),1)+"%",fmt(pct(g(inf,"소개").cap,cap),1)+"%",dp(pct(g(linf,"소개").cap,lcap),pct(g(inf,"소개").cap,cap))],
+          ["부산지사",fmt(g(lbr,"부산지사").cap)+"kW",fmt(g(br,"부산지사").cap)+"kW",dd(g(lbr,"부산지사").cap,g(br,"부산지사").cap)],
+          ["안성지사",fmt(g(lbr,"안성지사").cap)+"kW",fmt(g(br,"안성지사").cap)+"kW",dd(g(lbr,"안성지사").cap,g(br,"안성지사").cap)],
+          ["담당자 1위",first(lppl),top[0]||"–",""]
+        ])}</div>
+      <div class="card">${head("②",`${Y}년 누적 실적 리뷰`,`1~${M}월`)}
+        <div class="stats">${stat("누적 목표",fmt(cumT),"kW")}${stat("누적 실적",fmt(cum),"kW",`${cumR.length}건`)}${stat("달성율",fmt(pct(cum,cumT),1),"%",`${cum>=cumT?"초과":"부족"} ${fmt(Math.abs(cum-cumT))}kW`)}${stat("월평균",fmt(avg),"kW",`전년 ${fmt(lcum/M)}kW`)}</div>
+        ${kv([
+          ["분기 달성율",qs.map(([qq,p])=>`<span class="chip ${rateCls(p)}">${qq}Q ${fmt(p,1)}%</span>`).join(" "),null],
+          ["최고 / 최저",`${MON[mxM]} ${fmt(y26[mxM])}kW`,`${MON[mnM]} ${fmt(y26[mnM])}kW`],
+          ["목표 달성",`${hitM.length}개월 <small class="mut">(${hitM.map(m=>MON[m-1]).join(", ")||"없음"})</small>`,`미달 ${missM.length}개월`],
+          ["누적 순위",owners.slice(0,3).map((o,i)=>`${i+1}위 ${o} ${mw(g(pplCum,o).cap)}`).join(" · "),null],
+          ["누적 유입",`직접 ${fmt(pct(cinf["직접"]?cinf["직접"].cap:0,cum),1)}% · 소개 ${fmt(pct(cinf["소개"]?cinf["소개"].cap:0,cum),1)}%`,null],
+          ["연간 전망",`목표 ${mw(annT)} → 예상 A ${mw(estA)} (${fmt(pct(estA,annT),1)}%) · B ${mw(estB)} (${fmt(pct(estB,annT),1)}%)`,`남은 ${12-M}개월 월 ${fmt((annT-cum)/(12-M||1))}kW 필요`],
+          ["전사 누적",`${mw(allCum)} · ${allCumR.length}건 (${fmt(pct(allCum,allCumT),1)}%)`,"직영+외주+입찰"]
+        ])}</div>
+      <div class="card">${head("④",`전년 누적 비교`,`${lastY}년 1~${M}월 vs ${Y}년 1~${M}월`)}
+        ${cmp([
+          ["직영 누적 목표",fmt(lcumT)+"kW",fmt(cumT)+"kW",dd(lcumT,cumT)],
+          ["직영 누적 실적",fmt(lcum)+"kW",fmt(cum)+"kW",dd(lcum,cum)],
+          ["직영 달성율",fmt(pct(lcum,lcumT),1)+"%",fmt(pct(cum,cumT),1)+"%",dp(pct(lcum,lcumT),pct(cum,cumT))],
+          ["계약 건수",lcumR.length+"건",cumR.length+"건",dd(lcumR.length,cumR.length,"건")],
+          ["월평균",fmt(lcum/M)+"kW",fmt(avg)+"kW",dd(lcum/M,avg)],
+          ["소개 비중",fmt(pct(lcinf["소개"]?lcinf["소개"].cap:0,lcum),1)+"%",fmt(pct(cinf["소개"]?cinf["소개"].cap:0,cum),1)+"%",dp(pct(lcinf["소개"]?lcinf["소개"].cap:0,lcum),pct(cinf["소개"]?cinf["소개"].cap:0,cum))],
+          ["전사 누적 실적",fmt(lallCum)+"kW",fmt(allCum)+"kW",dd(lallCum,allCum)],
+          ["전사 달성율",fmt(pct(lallCum,lallCumT),1)+"%",fmt(pct(allCum,allCumT),1)+"%",dp(pct(lallCum,lallCumT),pct(allCum,allCumT))],
+          ["누적 1위",`${first(lcumPpl)} ${mw((lcumPpl[first(lcumPpl)]||{cap:0}).cap)}`,`${owners[0]||"–"} ${mw(g(pplCum,owners[0]).cap)}`,""]
+        ])}</div>
+     </div>
+     <div class="grid g3 ed" style="margin-top:16px">
+      ${editCard(NK,"causes",note.causes,cap>=T?"실적 분석":"실적 부진 원인",note.draft)}
+      ${editCard(NK,"failures",note.failures,"실패 사례",note.draft)}
+      ${editCard(NK,"improvements",note.improvements,`${MON[nM-1]} 개선사항`,note.draft)}
+     </div>
+     <div class="note" style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">${ghToken()?`<span>✅ <b>GitHub 자동 저장 켜짐</b> — 저장 버튼을 누르면 모든 기기에 반영됩니다.</span><button class="ic" style="padding:4px 10px;font-size:12px" onclick="gsPush()">지금 다시 저장</button>`:`<span>편집 내용은 지금 이 브라우저에만 저장됩니다. 모든 기기에 반영하려면 한 번만 설정하세요:</span><button class="ic" style="padding:4px 10px;font-size:12px" onclick="gsSetup()">GitHub 자동 저장 설정</button><span class="mut">또는</span><button class="ic" style="padding:4px 10px;font-size:12px" onclick="gsDownload()">⬇ 메모 파일 내려받기</button>`}<button class="ic" style="padding:4px 10px;font-size:12px;margin-left:auto" onclick="gsResetLocal()" title="이 브라우저의 임시 저장본을 버리고 GitHub(다른 PC 편집 포함) 내용으로 다시 불러옵니다">↻ 다른 기기 내용 불러오기</button><button class="ic" style="padding:4px 10px;font-size:12px" onclick="gsSetup()">⚙ 토큰</button></div>`}}
+  ];
+  function kpi(t,v,u,s,rate,dec=0){return `<div class="card kpi"><h3>${t}</h3><div class="v">${fmt(v,dec)}<small>${u}</small></div><div class="s">${s}</div>${rate!=null?`<div style="margin-top:8px">${pill(rate)}</div><div class="meter"><i style="width:${Math.min(rate,100)}%"></i></div>`:""}</div>`}
+  function kpiDelta(t,v,s,p){return `<div class="card kpi"><h3>${t}</h3><div class="v">${v>=0?"+":""}${fmt(v)}<small>kW</small></div><div class="s">${s}</div>${p!=null?`<div style="margin-top:8px"><span class="pill ${v>=0?"good":"bad"}">${v>=0?"▲":"▼"} ${v>=0?"+":""}${fmt(p,2)}%</span></div>`:""}</div>`}
+  function split(parts,f=v=>fmt(v)+"kW"){const t=parts.reduce((a,p)=>a+p[1],0);if(!t)return '<div class="note">데이터 없음</div>';return `<div class="split">${parts.map(p=>`<div style="flex:${p[1]||0.0001};background:var(${p[2]})">${p[1]/t>.12?`${p[0]} ${(p[1]/t*100).toFixed(1)}%`:""}</div>`).join("")}</div><div class="legend">${parts.map(p=>`<span style="--c:var(${p[2]})">${p[0]} ${f(p[1])} (${(p[1]/t*100).toFixed(2)}%)</span>`).join("")}</div>`}
+  function pipeTable(t,R,s,field){return `<div class="card"><h3 style="display:flex;justify-content:space-between;align-items:center">${t}<button class="ic" style="padding:3px 10px;font-size:12px" onclick="gsPipeEdit(this,'${NK}','${field}')">편집</button></h3><div class="pbody"><div class="tblwrap"><table><thead><tr><th>No.</th><th class="l">상호</th><th>용량(kW)</th><th>위치</th></tr></thead><tbody>${R.length?R.map((r,i)=>`<tr><td>${i+1}</td><td class="l">${r[0]}</td><td>${fmt(r[1])}</td><td>${r[2]||""}</td></tr>`).join(""):`<tr><td colspan="4" class="mut" style="text-align:center;padding:24px">미입력 — 편집을 눌러 입력하세요</td></tr>`}<tr class="tot"><td>합계</td><td></td><td>${fmt(s)}</td><td></td></tr></tbody></table></div></div>${pipeEditor(NK,field,R,"한 줄에 하나씩:  상호, 용량(kW), 위치\n예) ○○산업, 500, 김해\n(엑셀에서 3칸 복사해 붙여넣어도 됩니다)")}</div>`}
+
+  document.getElementById("nav").innerHTML=slides.map(s=>`<a href="#${s.id}" data-id="${s.id}">${s.nav}</a>`).join("");
+  document.getElementById("main").innerHTML=slides.map(s=>`<section class="slide" id="${s.id}">${s.html()}</section>`).join("");
+
+  /* charts */
+  charts.forEach(c=>c.destroy());charts=[];
+  const bar=(label,data,color,o={})=>Object.assign({label,data,backgroundColor:color,borderRadius:4,borderSkipped:"bottom",maxBarThickness:46,categoryPercentage:.7,barPercentage:.9},o);
+  const tl=Object.keys(typ).sort((a,b)=>typ[b].cap-typ[a].cap);
+  mk("c_perf",{type:"bar",data:{labels:["전체","부산지사","안성지사"],datasets:[bar("목표",[T,null,null],css("--s-target")),bar(MON[M-1],[cap,g(br,"부산지사").cap,g(br,"안성지사").cap],css("--s-actual")),bar("전월",[pcap,g(pbr,"부산지사").cap,g(pbr,"안성지사").cap],css("--s-prev"))]},options:base()});
+  mk("c_br",{type:"bar",data:{labels:["부산지사","안성지사"],datasets:[bar("건수",[g(br,"부산지사").n,g(br,"안성지사").n],[css("--s-actual"),css("--s-prev")],{maxBarThickness:64})]},options:Object.assign(base(),{plugins:{legend:{display:false},valLabels:{f:v=>v+"건"}}})});
+  mk("c_inC",{type:"bar",data:{labels:["전체","직접","소개"],datasets:[bar("용량",[cap,g(inf,"직접").cap,g(inf,"소개").cap],[css("--s-target"),css("--s-actual"),css("--s-prev")],{maxBarThickness:64})]},options:Object.assign(base(),{plugins:{legend:{display:false},valLabels:{f:v=>fmt(v)}}})});
+  mk("c_inN",{type:"bar",data:{labels:["전체","직접","소개"],datasets:[bar("건수",[cm.length,g(inf,"직접").n,g(inf,"소개").n],[css("--s-target"),css("--s-actual"),css("--s-prev")],{maxBarThickness:64})]},options:Object.assign(base(),{plugins:{legend:{display:false},valLabels:{f:v=>v+"건"}}})});
+  mk("c_tC",{type:"bar",data:{labels:tl.map(typeLabel),datasets:[bar("용량",tl.map(t=>typ[t].cap),css("--s-actual"),{maxBarThickness:64})]},options:Object.assign(base(),{plugins:{legend:{display:false},valLabels:{f:v=>fmt(v)}}})});
+  mk("c_tN",{type:"bar",data:{labels:tl.map(typeLabel),datasets:[bar("건수",tl.map(t=>typ[t].n),css("--s-actual"),{maxBarThickness:64})]},options:Object.assign(base(),{plugins:{legend:{display:false},valLabels:{f:v=>v+"건"}}})});
+  const P=[...owners,"직영 전체"];
+  mk("c_pM",{type:"bar",data:{labels:P,datasets:[bar(MON[M-1],[...owners.map(o=>g(ppl,o).cap),cap],P.map((_,i)=>css(i===P.length-1?"--s-target":"--s-actual")))]},options:Object.assign(base(),{plugins:{legend:{display:false},valLabels:{f:v=>fmt(v)}}})});
+  mk("c_pC",{type:"bar",data:{labels:P,datasets:[bar("누적",[...owners.map(o=>g(pplCum,o).cap),cum],P.map((_,i)=>css(i===P.length-1?"--s-target":"--s-actual")))]},options:Object.assign(base(),{plugins:{legend:{display:false},valLabels:{f:v=>fmt(v)}}})});
+  mk("c_q",{type:"bar",data:{labels:qRows.map(r=>MON[r.m-1]),datasets:[bar("목표",qRows.map(r=>r.target),css("--s-target")),bar("실적",qRows.map(r=>r.actual),css("--s-actual"))]},options:Object.assign(base(),{plugins:{legend:{display:false},valLabels:{only:1,f:v=>fmt(v)}}})});
+  mk("c_tr",{type:"bar",data:{labels:MON,datasets:[bar(lastY+"년",y25,css("--s-prev"),{maxBarThickness:22}),bar(Y+"년",y26,css("--s-actual"),{maxBarThickness:22}),bar("예상 A",fc,css("--s-fcst"),{maxBarThickness:22,grouped:false,barPercentage:.45})]},options:base()});
+
+  /* nav highlight */
+  const links=[...document.querySelectorAll("nav a")];
+  if(io)io.disconnect();
+  io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(a=>a.classList.toggle("on",a.dataset.id===e.target.id))}),{rootMargin:"-45% 0px -50% 0px"});
+  document.querySelectorAll("section.slide").forEach(s=>io.observe(s));
+  window._slides=slides;
+}
+let charts=[],io=null;
+function base(){const g=css("--grid"),t=css("--text-2");return {responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label||c.label}: ${fmt(c.parsed.y,2)}`}}},scales:{x:{grid:{display:false},ticks:{color:t,font:{family:"Noto Sans KR"}}},y:{beginAtZero:true,grid:{color:g},border:{display:false},ticks:{color:t,callback:v=>fmt(v)}}}}}
+const valLabels={id:"vl",afterDatasetsDraw(ch){const o=(ch.config.options.plugins||{}).valLabels;if(!o)return;const c=ch.ctx;c.save();c.fillStyle=css("--text-1");c.font="500 12px Noto Sans KR";c.textAlign="center";ch.data.datasets.forEach((ds,di)=>{if(o.only!=null&&o.only!==di)return;ch.getDatasetMeta(di).data.forEach((el,i)=>{const v=ds.data[i];if(v==null||v===0)return;c.fillText(o.f(v),el.x,el.y-6)})});c.restore();}};
+function mk(id,cfg){const el=document.getElementById(id);if(!el)return;charts.push(new Chart(el,Object.assign({plugins:[valLabels]},cfg)))}
+
+function curIdx(){const s=window._slides||[];const ys=s.map(x=>Math.abs(document.getElementById(x.id).getBoundingClientRect().top-64));return ys.indexOf(Math.min(...ys))}
+function go(i){const s=window._slides||[];i=Math.max(0,Math.min(s.length-1,i));document.getElementById(s[i].id).scrollIntoView({behavior:"smooth"})}
+document.addEventListener("keydown",e=>{const t=e.target;if(t&&(["SELECT","TEXTAREA","INPUT"].includes(t.tagName)||t.isContentEditable))return;if(["ArrowRight","PageDown","ArrowDown"].includes(e.key)||e.key===" "){e.preventDefault();go(curIdx()+1)}else if(["ArrowLeft","PageUp","ArrowUp"].includes(e.key)){e.preventDefault();go(curIdx()-1)}else if(e.key==="f"||e.key==="F")fs()});
+function fs(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}
+document.getElementById("fsBtn").onclick=fs;
+document.getElementById("themeBtn").onclick=()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark";try{localStorage.setItem("gs-theme",r.dataset.theme)}catch(e){}build()};
+try{const t=localStorage.getItem("gs-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",build);
+build();
+});
+</script>
+</body>
+</html>

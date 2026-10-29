@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>그랜드썬 실적 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>document.write('<script src="data.enc.js?t='+Date.now()+'"><\/script>');</script>
+<script src="gate.js"></script>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f4f4f2; --surface:#fcfcfb; --border:#e3e2de; --hover:#f0f0ed;
+  --text-1:#0b0b0b; --text-2:#52514e; --text-3:#8a8984;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
+  --target:#c9c8c3; --dim:#dcdbd6;
+  --good:#008300; --warn:#b26b00; --bad:#c43c3b; --accent:#2a78d6; --grid:#ecebe7;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#111110; --surface:#1a1a19; --border:#2e2e2b; --hover:#232322;
+    --text-1:#ffffff; --text-2:#c3c2b7; --text-3:#8d8c84;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+    --target:#55544f; --dim:#3a3a37;
+    --good:#3fb950; --warn:#e3a33b; --bad:#e66767; --accent:#3987e5; --grid:#2a2a27;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111110; --surface:#1a1a19; --border:#2e2e2b; --hover:#232322;
+  --text-1:#ffffff; --text-2:#c3c2b7; --text-3:#8d8c84;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --target:#55544f; --dim:#3a3a37;
+  --good:#3fb950; --warn:#e3a33b; --bad:#e66767; --accent:#3987e5; --grid:#2a2a27;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text-1);font-family:"Noto Sans KR",system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:14px}
+.app{display:flex;min-height:100vh}
+aside{width:270px;flex:none;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;padding:16px 14px 30px}
+.brand{font-weight:700;font-size:16px;letter-spacing:-.01em;margin-bottom:2px}
+.brand small{display:block;font-weight:400;font-size:11px;color:var(--text-3)}
+.sec{margin-top:16px}
+.sec h4{margin:0 0 6px;font-size:11px;font-weight:500;color:var(--text-3);letter-spacing:.05em;display:flex;justify-content:space-between;align-items:center}
+.sec h4 .mini{display:flex;gap:6px}
+.sec h4 .mini a{color:var(--accent);cursor:pointer;font-weight:400;letter-spacing:0}
+.seg{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.seg button{flex:1;border:0;background:transparent;color:var(--text-2);padding:8px;font:inherit;font-weight:500;cursor:pointer}
+.seg button.on{background:var(--text-1);color:var(--surface)}
+.seg button.cmp{background:var(--accent);color:#fff}
+.months{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.months button{border:1px solid var(--border);background:var(--surface);color:var(--text-2);border-radius:7px;padding:7px 0;font:inherit;font-size:13px;cursor:pointer}
+.months button:hover{background:var(--hover)}
+.months button.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+.months button.empty{color:var(--text-3);opacity:.55}
+.months button small{display:block;font-size:9px;font-weight:400;opacity:.8;line-height:1.1;margin-top:1px}
+.chk{display:flex;flex-direction:column;gap:2px;max-height:230px;overflow-y:auto}
+.chk label{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text-1)}
+.chk label:hover{background:var(--hover)}
+.chk label.off{color:var(--text-3)}
+.chk input{margin:0;accent-color:var(--accent)}
+.chk .n{margin-left:auto;font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums}
+.chk i{width:8px;height:8px;border-radius:2px;flex:none;background:var(--c)}
+.side-foot{margin-top:18px;display:flex;gap:6px;flex-wrap:wrap}
+button.ic,a.ic{border:1px solid var(--border);background:var(--surface);color:var(--text-2);border-radius:6px;padding:6px 10px;font:inherit;font-size:12px;cursor:pointer;text-decoration:none;display:inline-block}
+button.ic:hover,a.ic:hover{color:var(--text-1);background:var(--hover)}
+button.ic.on{background:var(--accent);border-color:var(--accent);color:#fff}
+main{flex:1;min-width:0;padding:20px 22px 60px}
+.top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.top h1{font-size:22px;margin:0;letter-spacing:-.02em}
+.top .sub{color:var(--text-2);font-size:13px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chip{font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:3px 10px;color:var(--text-2)}
+.chip b{color:var(--text-1);font-weight:500}
+.grid{display:grid;gap:12px}
+.g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}}
+@media (max-width:820px){.app{flex-direction:column}aside{width:auto;height:auto;position:static;border-right:0;border-bottom:1px solid var(--border)}.g2,.g3{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.card h3{margin:0 0 10px;font-size:13px;font-weight:500;color:var(--text-2);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card h3 .tabs{display:flex;gap:2px;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.card h3 .tabs button{border:0;background:transparent;color:var(--text-3);padding:3px 8px;font:inherit;font-size:11px;cursor:pointer}
+.card h3 .tabs button.on{background:var(--text-1);color:var(--surface)}
+.kpi .v{font-size:30px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi .v small{font-size:14px;font-weight:500;color:var(--text-2);margin-left:3px}
+.kpi .s{font-size:12px;color:var(--text-2);margin-top:5px}
+.kpi .cmp{display:flex;gap:14px;margin-top:4px}
+.kpi .cmp div{flex:1}.kpi .cmp b{display:block;font-size:11px;color:var(--text-3);font-weight:500}
+.kpi .cmp .v{font-size:22px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;padding:1px 8px;border-radius:99px;border:1px solid currentColor}
+.good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)} .mut{color:var(--text-3)}
+.meter{height:5px;background:var(--grid);border-radius:99px;margin-top:9px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--s1);border-radius:99px}
+.chart{position:relative;height:270px}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+th{font-weight:500;color:var(--text-2);font-size:11px;background:var(--bg);position:sticky;top:0}
+th:first-child,td:first-child,th.l,td.l{text-align:left}
+tr.tot td{font-weight:700;border-top:2px solid var(--text-3)}
+tbody tr:hover td{background:var(--hover)}
+.tblwrap{overflow:auto;max-height:420px}
+.note{font-size:11px;color:var(--text-3);margin-top:8px;line-height:1.5}
+.legend{display:flex;gap:12px;font-size:11px;color:var(--text-2);margin-bottom:6px;flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.bar-h{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px}
+.bar-h .lb{width:84px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-h .tr{flex:1;height:14px;background:var(--grid);border-radius:4px;overflow:hidden}
+.bar-h .tr i{display:block;height:100%;background:var(--c);border-radius:4px}
+.bar-h .vl{width:140px;flex:none;text-align:right;color:var(--text-2);font-variant-numeric:tabular-nums}
+.bar-h.two{margin:2px 0}.bar-h.two .lb{font-size:10px;color:var(--text-3);width:40px}
+.empty{padding:40px;text-align:center;color:var(--text-3)}
+input.search{width:100%;border:1px solid var(--border);background:var(--surface);color:var(--text-1);border-radius:6px;padding:6px 9px;font:inherit;font-size:13px}
+.d{font-size:11px}.d.up{color:var(--good)}.d.dn{color:var(--bad)}
+@media print{aside{display:none}main{padding:0}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="brand">GRAND SUN 실적 대시보드<small>계약 데이터 탐색 · 단위 kW</small></div>
+
+  <div class="sec"><h4>연도 / 비교</h4><div class="seg" id="yearSeg"></div>
+    <div class="note" id="cmpNote" style="margin-top:6px"></div></div>
+
+  <div class="sec"><h4>월 (복수 선택) <span class="mini"><a data-act="allm">전체</a><a data-act="nonem">해제</a><a data-act="ytd">누적</a></span></h4>
+    <div class="months" id="months"></div></div>
+
+  <div class="sec"><h4>구분 <span class="mini"><a data-f="ch" data-act="all">전체</a><a data-f="ch" data-act="none">해제</a></span></h4><div class="chk" id="f_ch"></div></div>
+  <div class="sec"><h4>담당자 <span class="mini"><a data-f="own" data-act="all">전체</a><a data-f="own" data-act="none">해제</a></span></h4><div class="chk" id="f_own"></div></div>
+  <div class="sec"><h4>지사 <span class="mini"><a data-f="br" data-act="all">전체</a><a data-f="br" data-act="none">해제</a></span></h4><div class="chk" id="f_br"></div></div>
+  <div class="sec"><h4>지역 <span class="mini"><a data-f="reg" data-act="all">전체</a><a data-f="reg" data-act="none">해제</a></span></h4><div class="chk" id="f_reg"></div></div>
+  <div class="sec"><h4>사업 타입 <span class="mini"><a data-f="t" data-act="all">전체</a><a data-f="t" data-act="none">해제</a></span></h4><div class="chk" id="f_t"></div></div>
+  <div class="sec"><h4>용량 구간 <span class="mini"><a data-f="band" data-act="all">전체</a><a data-f="band" data-act="none">해제</a></span></h4><div class="chk" id="f_band"></div></div>
+  <div class="sec"><h4>유입 <span class="mini"><a data-f="inflow" data-act="all">전체</a><a data-f="inflow" data-act="none">해제</a></span></h4><div class="chk" id="f_inflow"></div></div>
+
+  <div class="side-foot">
+    <button class="ic" id="resetBtn">필터 초기화</button>
+    <button class="ic" id="themeBtn">테마</button>
+    <a class="ic" href="report.html">월간 발표자료 →</a>
+    <button class="ic" onclick="GS_GATE.logout()">로그아웃</button>
+  </div>
+</aside>
+
+<main>
+  <div class="top"><h1 id="title"></h1><span class="sub" id="subtitle"></span></div>
+  <div class="chips" id="chips"></div>
+  <div id="content"></div>
+</main>
+</div>
+
+<script>
+GS_GATE.open(window.GS_ENC_DATA, function(){
+const D=window.GS_DATA, ROWS=D.rows, TG=D.targets;
+const MON=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+const BANDS=[["100kW 미만",0,100],["100~300kW",100,300],["300~500kW",300,500],["500~1,000kW",500,1000],["1,000kW 이상",1000,1e12]];
+ROWS.forEach(r=>{r.band=BANDS.find(b=>r.cap>=b[1]&&r.cap<b[2])[0]});
+const YEARS=[...new Set(ROWS.map(r=>r.y))].sort();
+const CH_ORDER=["직영","외주","입찰"], T_ORDER=["발전사업","자가소비","PPA","리스","임대","환경부","프로젝트","협력사EPC","협력사하도","기타(Z)"];
+const ORDERS={ch:CH_ORDER,t:T_ORDER,br:["안성지사","부산지사","기타"],band:BANDS.map(b=>b[0]),inflow:["직접","소개"]};
+const LABEL={own:"담당자",t:"사업 타입",br:"지사",reg:"지역",band:"용량 구간",inflow:"유입",ch:"구분"};
+const SERIES=["--s1","--s2","--s3","--s4","--s5","--s6","--s7","--s8"];
+const YCOL={}; YEARS.forEach((y,i)=>YCOL[y]=i===YEARS.length-1?"--s1":"--s2");
+const fmt=(n,d=0)=>n==null?"–":Number(n).toLocaleString("ko-KR",{maximumFractionDigits:d,minimumFractionDigits:d});
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const rateCls=r=>r>=100?"good":r>=80?"warn":"bad";
+const pill=r=>r==null?"":`<span class="pill ${rateCls(r)}">${r>=100?"▲":r>=80?"●":"▼"} ${fmt(r,1)}%</span>`;
+const diff=(a,b,d=0,unit="")=>{if(!a&&!b)return'<span class="d mut">–</span>';const x=b-a;const p=a?` (${x>=0?"+":""}${fmt(x/a*100,1)}%)`:"";return `<span class="d ${x>0?"up":x<0?"dn":"mut"}">${x>=0?"+":""}${fmt(x,d)}${unit}${p}</span>`};
+const uniq=(arr,key)=>[...new Set(arr.map(r=>r[key]).filter(v=>v!==""))];
+const sortBy=(vals,order)=>vals.sort((a,b)=>{const ia=order.indexOf(a),ib=order.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib)||a.localeCompare(b,"ko")});
+
+/* ---------- state ---------- */
+const S={y:YEARS[YEARS.length-1],cmp:false,months:new Set(),f:{}};
+const FKEYS=["ch","own","br","reg","t","band","inflow"];
+const scopeYears=()=>S.cmp?YEARS:[S.y];
+const scopeRows=()=>ROWS.filter(r=>scopeYears().includes(r.y));
+const yearRows=y=>ROWS.filter(r=>r.y===y);
+function sumCap(rows,key,val){return rows.filter(r=>r[key]===val).reduce((a,r)=>a+r.cap,0)}
+function buildOpts(keep){
+  const sr=scopeRows(),opts={};
+  opts.ch=sortBy(uniq(sr,"ch"),CH_ORDER); opts.own=uniq(sr,"own").sort((a,b)=>sumCap(sr,"own",b)-sumCap(sr,"own",a));
+  opts.br=ORDERS.br.filter(b=>uniq(sr,"br").includes(b)); opts.reg=uniq(sr,"reg").sort((a,b)=>sumCap(sr,"reg",b)-sumCap(sr,"reg",a));
+  opts.t=sortBy(uniq(sr,"t"),T_ORDER); opts.band=ORDERS.band; opts.inflow=ORDERS.inflow;
+  S.opts=opts;
+  if(!keep){FKEYS.forEach(k=>S.f[k]=new Set(opts[k]));S.f.ch=new Set(["직영"]);}
+  else FKEYS.forEach(k=>{const prevAll=S.prevOpts&&S.f[k].size===S.prevOpts[k].length;S.f[k]=prevAll?new Set(opts[k]):new Set([...S.f[k]].filter(v=>opts[k].includes(v)));if(!S.f[k].size)S.f[k]=new Set(opts[k])});
+  S.prevOpts=opts;
+}
+function init(){buildOpts(false);const last=Math.max(...yearRows(S.y).map(r=>r.m));S.months=new Set([last]);}
+const passF=(r,ignore)=>FKEYS.every(k=>k===ignore||S.f[k].has(r[k]));
+const filtered=(y,ignore)=>yearRows(y).filter(r=>S.months.has(r.m)&&passF(r,ignore));
+const filteredAll=(y,ignore)=>yearRows(y).filter(r=>passF(r,ignore));
+
+/* ---------- sidebar ---------- */
+function renderSidebar(){
+  document.getElementById("yearSeg").innerHTML=YEARS.map(y=>`<button class="${!S.cmp&&y===S.y?"on":""}" data-y="${y}">${y}년</button>`).join("")+`<button class="${S.cmp?"cmp":""}" data-cmp="1">비교</button>`;
+  document.getElementById("cmpNote").textContent=S.cmp?`${YEARS.join("년 vs ")}년 — 같은 월·필터로 두 해를 나란히 비교합니다.`:"'비교'를 누르면 25년·26년을 나란히 봅니다.";
+  const byM={};scopeYears().forEach(y=>{byM[y]={};yearRows(y).forEach(r=>{byM[y][r.m]=(byM[y][r.m]||0)+r.cap})});
+  document.getElementById("months").innerHTML=MON.map((m,i)=>{const n=i+1;const v=scopeYears().map(y=>byM[y][n]||0);const has=v.some(x=>x>0);
+    return `<button data-m="${n}" class="${S.months.has(n)?"on":""} ${has?"":"empty"}">${m}<small>${has?v.map(x=>x?fmt(x/1000,1):"–").join(" / ")+"MW":"–"}</small></button>`}).join("");
+  FKEYS.forEach(k=>{
+    const agg={};scopeYears().forEach(y=>filtered(y,k).forEach(r=>{agg[r[k]]=(agg[r[k]]||0)+r.cap}));
+    document.getElementById("f_"+k).innerHTML=S.opts[k].map((v,i)=>`<label class="${S.f[k].has(v)?"":"off"}"><input type="checkbox" data-f="${k}" data-v="${v}" ${S.f[k].has(v)?"checked":""}>${["own","t","reg"].includes(k)?`<i style="--c:var(${SERIES[i%8]})"></i>`:""}<span>${v}</span><span class="n">${agg[v]?fmt(agg[v]):"0"}</span></label>`).join("");
+  });
+}
+document.getElementById("yearSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.cmp){S.cmp=!S.cmp}else{S.cmp=false;S.y=+b.dataset.y}
+  buildOpts(true);const avail=new Set(scopeRows().map(r=>r.m));S.months=new Set([...S.months].filter(m=>avail.has(m)));if(!S.months.size)S.months=new Set([Math.max(...avail)]);render()});
+document.getElementById("months").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const m=+b.dataset.m;if(e.shiftKey&&S.months.size){const lo=Math.min(m,...S.months),hi=Math.max(m,...S.months);for(let i=lo;i<=hi;i++)S.months.add(i)}else S.months.has(m)?S.months.delete(m):S.months.add(m);render()});
+document.querySelector("aside").addEventListener("click",e=>{const a=e.target.closest("a[data-act]");if(!a)return;const act=a.dataset.act;
+  if(act==="allm")S.months=new Set(MON.map((_,i)=>i+1));else if(act==="nonem")S.months=new Set();
+  else if(act==="ytd"){const last=Math.max(...yearRows(S.cmp?YEARS[YEARS.length-1]:S.y).map(r=>r.m));S.months=new Set(Array.from({length:last},(_,i)=>i+1))}
+  else{const k=a.dataset.f;S.f[k]=act==="all"?new Set(S.opts[k]):new Set()}
+  render()});
+document.querySelector("aside").addEventListener("change",e=>{const c=e.target;if(c.type!=="checkbox")return;const k=c.dataset.f,v=c.dataset.v;c.checked?S.f[k].add(v):S.f[k].delete(v);render()});
+document.getElementById("resetBtn").onclick=()=>{init();render()};
+
+/* ---------- charts ---------- */
+let charts=[];
+function base(){const g=css("--grid"),t=css("--text-2");return {responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label||c.label}: ${fmt(c.parsed.y,1)}`}}},
+  scales:{x:{grid:{display:false},ticks:{color:t,font:{family:"Noto Sans KR",size:11}}},y:{beginAtZero:true,grid:{color:g},border:{display:false},ticks:{color:t,font:{size:11},callback:v=>fmt(v)}}}}}
+const bar=(label,data,color,o={})=>Object.assign({label,data,backgroundColor:color,borderRadius:4,borderSkipped:"bottom",maxBarThickness:26,categoryPercentage:.72,barPercentage:.9},o);
+const valLabels={id:"vl",afterDatasetsDraw(ch){const o=(ch.config.options.plugins||{}).valLabels;if(!o)return;const c=ch.ctx;c.save();c.fillStyle=css("--text-1");c.font="500 10px Noto Sans KR";c.textAlign="center";
+  ch.data.datasets.forEach((ds,di)=>{ch.getDatasetMeta(di).data.forEach((el,i)=>{const v=ds.data[i];if(!v)return;c.fillText(o.f(v),el.x,el.y-4)})});c.restore();}};
+function mk(id,cfg){const el=document.getElementById(id);if(!el)return;charts.push(new Chart(el,Object.assign({plugins:[valLabels]},cfg)))}
+const targetBar=tgM=>bar("목표",tgM,"transparent",{borderColor:css("--text-3"),borderWidth:1.5,borderDash:[3,3]});
+
+/* ---------- helpers ---------- */
+function kpi(t,v,u,s,rate,dec=0){return `<div class="card kpi"><h3>${t}</h3><div class="v">${fmt(v,dec)}<small>${u}</small></div><div class="s">${s}</div>${rate!=null?`<div style="margin-top:7px">${pill(rate)}</div><div class="meter"><i style="width:${Math.min(rate,100)}%"></i></div>`:""}</div>`}
+function kpiCmp(t,vals,u,dec,subs,rates){const [a,b]=vals;return `<div class="card kpi"><h3>${t}</h3><div class="cmp">${YEARS.map((y,i)=>`<div><b>${y}년</b><div class="v">${fmt(vals[i],dec)}<small>${u}</small></div><div class="s">${subs[i]||""}</div>${rates&&rates[i]!=null?`<div style="margin-top:4px">${pill(rates[i])}</div>`:""}</div>`).join("")}</div><div class="s" style="margin-top:8px">증감 ${diff(a,b,dec,u)}</div></div>`}
+function groupAgg(rows,key,order){const a={};rows.forEach(r=>{const k=r[key]||"(없음)";a[k]=a[k]||{cap:0,n:0,amt:0};a[k].cap+=r.cap;a[k].n++;a[k].amt+=r.amt});
+  let keys=Object.keys(a);keys=order?sortBy(keys,order):keys.sort((x,y)=>a[y].cap-a[x].cap);return keys.map(k=>({k,...a[k]}))}
+const colOf=(key,k)=>["own","t","reg"].includes(key)?`var(${SERIES[Math.max(0,(S.opts[key]||[]).indexOf(k))%8]})`:"var(--s1)";
+function targetFor(y,ms){const tg=TG[y]||{};const chs=[...S.f.ch].filter(c=>tg[c]);return {chs,target:chs.length?ms.reduce((a,m)=>a+chs.reduce((b,c)=>b+(tg[c][m-1]||0),0),0):0,tgM:chs.length?Array.from({length:12},(_,i)=>chs.reduce((b,c)=>b+(tg[c][i]||0),0)):null}}
+function monthLabel(ms){return ms.length===0?"월 미선택":ms.length===12?"연간(1~12월)":ms.length===1?MON[ms[0]-1]:(ms.every((m,i)=>i===0||m===ms[i-1]+1)?`${MON[ms[0]-1]}~${MON[ms[ms.length-1]-1]}`:ms.map(m=>MON[m-1]).join(", "))}
+function chips(){const c=k=>S.f[k].size===S.opts[k].length?"":`<span class="chip">${LABEL[k]} <b>${S.f[k].size?[...S.f[k]].join(", "):"(없음)"}</b></span>`;document.getElementById("chips").innerHTML=FKEYS.map(c).join("")||'<span class="chip">필터 없음 (선택 월 전체)</span>'}
+
+/* ---------- single-year view ---------- */
+function breakdownCard(id,title,rows,key){const g=groupAgg(rows,key,ORDERS[key]),tot=g.reduce((s,x)=>s+x.cap,0),totN=g.reduce((s,x)=>s+x.n,0);
+  return `<div class="card"><h3>${title} <span class="tabs" data-card="${id}"><button class="on" data-mode="cap">용량</button><button data-mode="n">건수</button></span></h3>
+    <div data-bd="${id}" data-key="${key}">${g.length?g.map(x=>`<div class="bar-h"><span class="lb" title="${x.k}">${x.k}</span><span class="tr"><i style="--c:${colOf(key,x.k)};width:${tot?x.cap/tot*100:0}%"></i></span><span class="vl">${fmt(x.cap)} kW · ${x.n}건 (${tot?fmt(x.cap/tot*100,1):0}%)</span></div>`).join(""):'<div class="empty">데이터 없음</div>'}</div>
+    <div class="note">합계 ${fmt(tot)} kW · ${totN}건 · 막대 = 용량 비중</div></div>`}
+function renderSingle(){
+  const y=S.y, rows=filtered(y), all=filteredAll(y), ms=[...S.months].sort((a,b)=>a-b);
+  const cap=rows.reduce((a,r)=>a+r.cap,0), n=rows.length, amt=rows.reduce((a,r)=>a+r.amt,0);
+  const {chs,target,tgM}=targetFor(y,ms); const rate=target?cap/target*100:null; const mLabel=monthLabel(ms);
+  document.getElementById("title").textContent=`${y}년 ${mLabel} 실적`;
+  document.getElementById("subtitle").textContent=`${[...S.f.ch].join("+")||"구분 미선택"} · 계약 ${n}건 · ${fmt(cap)} kW`;
+  const byM=Array(12).fill(0),byMn=Array(12).fill(0);all.forEach(r=>{byM[r.m-1]+=r.cap;byMn[r.m-1]++});
+  const prevY=y-1,hasPrev=YEARS.includes(prevY);const prevByM=Array(12).fill(0);if(hasPrev)filteredAll(prevY,"own").forEach(r=>{prevByM[r.m-1]+=r.cap});
+  const lastM=Math.max(0,...all.map(r=>r.m));
+  document.getElementById("content").innerHTML=`
+    <div class="grid g4">
+      ${kpi("선택 월 계약용량",cap,"kW",`${n}건 · 건당 평균 ${n?fmt(cap/n):0} kW`,null)}
+      ${kpi("목표 대비",target?cap:0,"kW",target?`목표 ${fmt(target)} kW (${chs.join("+")} ${mLabel})`:"목표 없음 (구분이 직영/외주/입찰이 아님)",rate)}
+      ${kpi("공사금액(VAT별도)",amt/1e8,"억원",`시트 '공사금액(부가세제외)' 합계`,null,1)}
+      ${kpi(`연간 누적(1~${lastM}월)`,all.reduce((a,r)=>a+r.cap,0),"kW",`${all.length}건 · 현재 필터 기준`,null)}
+    </div>
+    <div class="grid g2" style="margin-top:12px">
+      <div class="card"><h3>${y}년 월별 계약용량 (선택 월 강조)</h3>
+        <div class="legend"><span style="--c:var(--s1)">선택 월</span><span style="--c:var(--dim)">미선택 월</span>${tgM?`<span style="--c:transparent;outline:1.5px dashed var(--text-3);outline-offset:-1px">목표(점선)</span>`:""}${hasPrev?`<span style="--c:var(--s2)">${prevY}년 (선, 담당자 필터 제외)</span>`:""}</div>
+        <div class="chart"><canvas id="c_month"></canvas></div></div>
+      <div class="card"><h3>${y}년 월별 계약건수</h3><div class="chart"><canvas id="c_monthN"></canvas></div></div>
+    </div>
+    <div class="grid g2" style="margin-top:12px">
+      ${breakdownCard("own","담당자별",rows,"own")}${breakdownCard("t","사업 타입별",rows,"t")}
+      ${breakdownCard("br","지사별",rows,"br")}${breakdownCard("reg","지역별",rows,"reg")}
+      ${breakdownCard("band","용량 구간별",rows,"band")}${breakdownCard("inflow","유입별",rows,"inflow")}
+    </div>
+    <div class="card" style="margin-top:12px"><h3>담당자 × 월 (kW)</h3><div class="tblwrap"><table id="t_pm"></table></div></div>
+    <div class="card" style="margin-top:12px"><h3>계약 목록 (${n}건) <input class="search" id="q" placeholder="발전소명·지역·담당자 검색" style="max-width:260px"></h3><div class="tblwrap"><table id="t_list"></table></div>${footNote()}</div>`;
+  const selCol=MON.map((_,i)=>css(S.months.has(i+1)?"--s1":"--dim"));
+  const ds=[];if(tgM)ds.push(targetBar(tgM));ds.push(bar(y+"년",byM,selCol));if(hasPrev)ds.push({type:"line",label:prevY+"년",data:prevByM,borderColor:css("--s2"),backgroundColor:css("--s2"),borderWidth:2,pointRadius:3,tension:0,order:-1});
+  mk("c_month",{type:"bar",data:{labels:MON,datasets:ds},options:base()});
+  mk("c_monthN",{type:"bar",data:{labels:MON,datasets:[bar("건수",byMn,selCol,{maxBarThickness:28})]},options:Object.assign(base(),{plugins:{legend:{display:false},valLabels:{f:v=>v+"건"},tooltip:{callbacks:{label:c=>`${c.parsed.y}건`}}}})});
+  personMonthTable("t_pm",rows,ms);
+  contractList("t_list","q",rows);
+  document.querySelectorAll(".tabs[data-card]").forEach(tb=>tb.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;tb.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+    const box=document.querySelector(`[data-bd="${tb.dataset.card}"]`),key=box.dataset.key,mode=b.dataset.mode;const g=groupAgg(rows,key,ORDERS[key]),tot=g.reduce((s,x)=>s+x[mode],0);
+    box.innerHTML=g.map(x=>`<div class="bar-h"><span class="lb" title="${x.k}">${x.k}</span><span class="tr"><i style="--c:${colOf(key,x.k)};width:${tot?x[mode]/tot*100:0}%"></i></span><span class="vl">${fmt(x.cap)} kW · ${x.n}건 (${tot?fmt(x[mode]/tot*100,1):0}%)</span></div>`).join("")}));
+}
+function personMonthTable(id,rows,ms){const owns=groupAgg(rows,"own").map(x=>x.k),pm={};rows.forEach(r=>{pm[r.own]=pm[r.own]||{};pm[r.own][r.m]=(pm[r.own][r.m]||0)+r.cap});
+  const cap=rows.reduce((a,r)=>a+r.cap,0);
+  document.getElementById(id).innerHTML=`<thead><tr><th>담당자</th>${ms.map(m=>`<th>${MON[m-1]}</th>`).join("")}<th>합계</th><th>건수</th></tr></thead><tbody>
+    ${owns.map(o=>`<tr><td>${o}</td>${ms.map(m=>`<td>${pm[o][m]?fmt(pm[o][m]):"<span class='mut'>–</span>"}</td>`).join("")}<td><b>${fmt(ms.reduce((a,m)=>a+(pm[o][m]||0),0))}</b></td><td>${rows.filter(r=>r.own===o).length}</td></tr>`).join("")}
+    <tr class="tot"><td>합계</td>${ms.map(m=>`<td>${fmt(rows.filter(r=>r.m===m).reduce((a,r)=>a+r.cap,0))}</td>`).join("")}<td>${fmt(cap)}</td><td>${rows.length}</td></tr></tbody>`}
+function contractList(id,qid,rows){
+  const COLS=[["m","월",0],["d","계약일",0],["name","발전소명",1],["ch","구분",1],["t","타입",1],["own","담당자",1],["br","지사",1],["reg","지역",1],["loc","위치",1],["inflow","유입",1],["cap","용량(kW)",0],["band","구간",0]];
+  let sortKey=(window._sort&&window._sort.key)||"m",sortDir=(window._sort&&window._sort.dir)||1,q="";
+  const cmpv=(a,b)=>{let x=a[sortKey],y=b[sortKey];if(sortKey==="band"){x=BANDS.findIndex(z=>z[0]===x);y=BANDS.findIndex(z=>z[0]===y)}
+    if(typeof x==="number"&&typeof y==="number")return (x-y)*sortDir;x=String(x??"");y=String(y??"");return x.localeCompare(y,"ko")*sortDir};
+  const render=()=>{const L=rows.filter(r=>!q||[r.name,r.reg,r.own,r.t,r.loc].join(" ").includes(q)).sort((a,b)=>cmpv(a,b)||(b.cap-a.cap));
+    document.getElementById(id).innerHTML=`<thead><tr>${COLS.map(([k,l,left])=>`<th class="${left?"l ":""}sortable ${sortKey===k?"on":""}" data-k="${k}" title="클릭하여 정렬">${l}<span class="arrow">${sortKey===k?(sortDir>0?"▲":"▼"):"⇅"}</span></th>`).join("")}</tr></thead><tbody>
+    ${L.map(r=>`<tr><td>${MON[r.m-1]}</td><td>${r.d}</td><td class="l">${r.name}</td><td class="l">${r.ch}</td><td class="l">${r.t}</td><td class="l">${r.own}</td><td class="l">${r.br}</td><td class="l">${r.reg}</td><td class="l">${r.loc}</td><td class="l">${r.inflow}</td><td>${fmt(r.cap,2)}</td><td>${r.band}</td></tr>`).join("")}
+    ${L.length?`<tr class="tot"><td colspan="10">합계 ${L.length}건</td><td>${fmt(L.reduce((a,r)=>a+r.cap,0),2)}</td><td></td></tr>`:'<tr><td colspan="12" class="empty">데이터 없음</td></tr>'}</tbody>`;
+    document.getElementById(id).querySelectorAll("th.sortable").forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortKey===k)sortDir=-sortDir;else{sortKey=k;sortDir=(k==="cap")?-1:1}window._sort={key:sortKey,dir:sortDir};render()})};
+  render();document.getElementById(qid).addEventListener("input",e=>{q=(e.target.value||"").trim();render()})}
+const footNote=()=>`<div class="note">용량 구간은 이 대시보드에서 임의로 나눈 기준입니다 (100 / 300 / 500 / 1,000 kW). 지사 구분은 엑셀 '지역' 시트의 안성지사·부산지사 분류를 따릅니다. '기타(Z)' 시트 건은 PPT에서 '건물지원'으로 표기된 건을 포함합니다.</div>`;
+
+/* ---------- compare view ---------- */
+function cmpBreakdown(title,key,R){const [A,B]=YEARS.map(y=>groupAgg(R[y],key,ORDERS[key]));const keys=sortBy([...new Set([...A,...B].map(x=>x.k))],ORDERS[key]||[...A,...B].sort((x,y)=>y.cap-x.cap).map(x=>x.k));
+  const get=(g,k)=>g.find(x=>x.k===k)||{cap:0,n:0};const mx=Math.max(1,...keys.flatMap(k=>[get(A,k).cap,get(B,k).cap]));
+  const totA=A.reduce((s,x)=>s+x.cap,0),totB=B.reduce((s,x)=>s+x.cap,0),nA=A.reduce((s,x)=>s+x.n,0),nB=B.reduce((s,x)=>s+x.n,0);
+  return `<div class="card"><h3>${title}</h3><div class="legend">${YEARS.map(y=>`<span style="--c:var(${YCOL[y]})">${y}년</span>`).join("")}</div>
+    <div class="tblwrap"><table><thead><tr><th>${LABEL[key]}</th><th style="width:34%">용량 비교</th><th>${YEARS[0]} kW</th><th>${YEARS[1]} kW</th><th>증감</th><th>${YEARS[0]}건</th><th>${YEARS[1]}건</th></tr></thead><tbody>
+    ${keys.map(k=>{const a=get(A,k),b=get(B,k);return `<tr><td>${k}</td><td style="padding:3px 8px"><div class="bar-h two"><span class="lb">${YEARS[0]}</span><span class="tr"><i style="--c:var(${YCOL[YEARS[0]]});width:${a.cap/mx*100}%"></i></span></div><div class="bar-h two"><span class="lb">${YEARS[1]}</span><span class="tr"><i style="--c:var(${YCOL[YEARS[1]]});width:${b.cap/mx*100}%"></i></span></div></td><td>${fmt(a.cap)}</td><td>${fmt(b.cap)}</td><td>${diff(a.cap,b.cap)}</td><td>${a.n}</td><td>${b.n}</td></tr>`}).join("")}
+    <tr class="tot"><td>합계</td><td></td><td>${fmt(totA)}</td><td>${fmt(totB)}</td><td>${diff(totA,totB)}</td><td>${nA}</td><td>${nB}</td></tr></tbody></table></div></div>`}
+function renderCompare(){
+  const ms=[...S.months].sort((a,b)=>a-b),mLabel=monthLabel(ms);
+  const R={},ALL={};YEARS.forEach(y=>{R[y]=filtered(y);ALL[y]=filteredAll(y)});
+  const cap=YEARS.map(y=>R[y].reduce((a,r)=>a+r.cap,0)),n=YEARS.map(y=>R[y].length),amt=YEARS.map(y=>R[y].reduce((a,r)=>a+r.amt,0)/1e8);
+  const tg=YEARS.map(y=>targetFor(y,ms)),rate=tg.map((t,i)=>t.target?cap[i]/t.target*100:null);
+  const ytd=YEARS.map(y=>ALL[y].reduce((a,r)=>a+r.cap,0)),ytdN=YEARS.map(y=>ALL[y].length);
+  document.getElementById("title").textContent=`${YEARS[0]}년 vs ${YEARS[1]}년 · ${mLabel} 비교`;
+  document.getElementById("subtitle").textContent=`${[...S.f.ch].join("+")||"구분 미선택"} · ${YEARS.map((y,i)=>`${y}년 ${n[i]}건 ${fmt(cap[i])}kW`).join(" / ")}`;
+  const byM={},byMn={};YEARS.forEach(y=>{byM[y]=Array(12).fill(0);byMn[y]=Array(12).fill(0);ALL[y].forEach(r=>{byM[y][r.m-1]+=r.cap;byMn[y][r.m-1]++})});
+  const avg=(c,k)=>k?c/k:0;
+  document.getElementById("content").innerHTML=`
+    <div class="grid g4">
+      ${kpiCmp("선택 월 계약용량",cap,"kW",0,n.map((k,i)=>`${k}건 · 건당 ${fmt(avg(cap[i],k))}kW`))}
+      ${kpiCmp("목표 대비 달성율",tg.map(t=>t.target),"kW 목표",0,tg.map((t,i)=>t.target?`실적 ${fmt(cap[i])}kW`:"목표 없음"),rate)}
+      ${kpiCmp("공사금액(VAT별도)",amt,"억원",1,["",""])}
+      ${kpiCmp("연간 누적(현재 필터)",ytd,"kW",0,ytdN.map(k=>`${k}건 · 해당 연도 전체`))}
+    </div>
+    <div class="grid g2" style="margin-top:12px">
+      <div class="card"><h3>월별 계약용량 (kW)</h3><div class="legend">${YEARS.map(y=>`<span style="--c:var(${YCOL[y]})">${y}년</span>`).join("")}<span style="--c:transparent;outline:1.5px dashed var(--text-3);outline-offset:-1px">목표(점선, ${YEARS[1]}년)</span></div><div class="chart"><canvas id="c_cm"></canvas></div><div class="note">선택한 월은 진하게, 나머지는 흐리게 표시</div></div>
+      <div class="card"><h3>월별 계약건수</h3><div class="legend">${YEARS.map(y=>`<span style="--c:var(${YCOL[y]})">${y}년</span>`).join("")}</div><div class="chart"><canvas id="c_cmN"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:12px"><h3>월별 비교표 (선택 월)</h3><div class="tblwrap"><table><thead><tr><th>월</th><th>${YEARS[0]} 목표</th><th>${YEARS[0]} 실적</th><th>달성율</th><th>${YEARS[1]} 목표</th><th>${YEARS[1]} 실적</th><th>달성율</th><th>실적 증감</th><th>${YEARS[0]}건</th><th>${YEARS[1]}건</th></tr></thead><tbody>
+      ${ms.map(m=>{const a=byM[YEARS[0]][m-1],b=byM[YEARS[1]][m-1],ta=tg[0].tgM?tg[0].tgM[m-1]:0,tb=tg[1].tgM?tg[1].tgM[m-1]:0;return `<tr><td>${MON[m-1]}</td><td class="mut">${ta?fmt(ta):"–"}</td><td>${fmt(a)}</td><td>${ta?pill(a/ta*100):""}</td><td class="mut">${tb?fmt(tb):"–"}</td><td>${fmt(b)}</td><td>${tb?pill(b/tb*100):""}</td><td>${diff(a,b)}</td><td>${byMn[YEARS[0]][m-1]}</td><td>${byMn[YEARS[1]][m-1]}</td></tr>`}).join("")}
+      <tr class="tot"><td>합계</td><td class="mut">${tg[0].target?fmt(tg[0].target):"–"}</td><td>${fmt(cap[0])}</td><td>${pill(rate[0])}</td><td class="mut">${tg[1].target?fmt(tg[1].target):"–"}</td><td>${fmt(cap[1])}</td><td>${pill(rate[1])}</td><td>${diff(cap[0],cap[1])}</td><td>${n[0]}</td><td>${n[1]}</td></tr></tbody></table></div></div>
+    <div class="grid g2" style="margin-top:12px">
+      ${cmpBreakdown("담당자별 비교","own",R)}${cmpBreakdown("사업 타입별 비교","t",R)}
+      ${cmpBreakdown("지사별 비교","br",R)}${cmpBreakdown("지역별 비교","reg",R)}
+      ${cmpBreakdown("용량 구간별 비교","band",R)}${cmpBreakdown("유입별 비교","inflow",R)}
+    </div>
+    <div class="grid g2" style="margin-top:12px">
+      ${YEARS.map(y=>`<div class="card"><h3>${y}년 담당자 × 월 (kW)</h3><div class="tblwrap"><table id="t_pm_${y}"></table></div></div>`).join("")}
+    </div>
+    <div class="grid g2" style="margin-top:12px">
+      ${YEARS.map(y=>`<div class="card"><h3>${y}년 계약 목록 (${R[y].length}건) <input class="search" id="q_${y}" placeholder="검색" style="max-width:180px"></h3><div class="tblwrap"><table id="t_list_${y}"></table></div></div>`).join("")}
+    </div>${footNote()}`;
+  const colFor=y=>MON.map((_,i)=>{const c=css(YCOL[y]);return S.months.has(i+1)?c:c+"55"});
+  const ds=[];if(tg[1].tgM)ds.push(targetBar(tg[1].tgM));YEARS.forEach(y=>ds.push(bar(y+"년",byM[y],colFor(y),{maxBarThickness:18})));
+  mk("c_cm",{type:"bar",data:{labels:MON,datasets:ds},options:base()});
+  mk("c_cmN",{type:"bar",data:{labels:MON,datasets:YEARS.map(y=>bar(y+"년",byMn[y],colFor(y),{maxBarThickness:18}))},options:Object.assign(base(),{plugins:{legend:{display:false},valLabels:{f:v=>v},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y}건`}}}})});
+  YEARS.forEach(y=>{personMonthTable("t_pm_"+y,R[y],ms);contractList("t_list_"+y,"q_"+y,R[y])});
+}
+
+function render(){renderSidebar();chips();charts.forEach(c=>c.destroy());charts=[];S.cmp?renderCompare():renderSingle()}
+document.getElementById("themeBtn").onclick=()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark";try{localStorage.setItem("gs-theme",r.dataset.theme)}catch(e){}render()};
+try{const t=localStorage.getItem("gs-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",render);
+init();render();
+});
+</script>
+</body>
+</html>
